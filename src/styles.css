@@ -1,0 +1,305 @@
+/* Eisbachwelle — warmer Dark-Mode (Stil B). Mobile-first, sehr leichtes CSS,
+   keine Framework-Abhängigkeit. Farben als Custom Properties für einfachen Wechsel. */
+
+:root {
+  /* Warmer, nicht ganz schwarzer Hintergrund + Wasser-Teal + warmer Bernstein-Akzent. */
+  --bg: #0e1418;
+  --bg-soft: #161e24;
+  --card: #1b242b;
+  --card-edge: #2a363f;
+  --text: #eef3f5;
+  --text-dim: #9fb0b9;
+  --text-faint: #6f818b;
+
+  --water: #2dd4bf; /* Teal: Wasser, Primärakzent */
+  --warm: #f5a05a; /* Bernstein/Koralle: Aufmerksamkeit/steigend */
+  --cool: #5ab0e0; /* gedämpftes Blau: fallend */
+  --neutral: #8aa0ab; /* stabil */
+
+  --rising: var(--warm);
+  --falling: var(--cool);
+  --stable: var(--neutral);
+  --unknown: var(--text-faint);
+
+  --radius: 18px;
+  --gap: 14px;
+  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+
+  --font:
+    system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  background: radial-gradient(120% 80% at 50% 0%, var(--bg-soft), var(--bg));
+  background-attachment: fixed;
+  color: var(--text);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.app-shell {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: calc(env(safe-area-inset-top, 0px) + 20px) 16px
+    calc(env(safe-area-inset-bottom, 0px) + 28px);
+}
+
+.app-shell--message {
+  min-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+}
+
+/* --- Kopf --- */
+
+.app-header {
+  margin-bottom: 22px;
+}
+
+.app-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.app-location {
+  margin: 2px 0 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.badge--stale {
+  background: rgba(245, 160, 90, 0.16);
+  color: var(--warm);
+  border: 1px solid rgba(245, 160, 90, 0.4);
+}
+
+/* --- Raster --- */
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--gap);
+}
+
+.card {
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius);
+  padding: 16px 16px 18px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 132px;
+}
+
+/* Abfluss = wichtigster Wert: volle Breite, größer. */
+.card--primary {
+  grid-column: 1 / -1;
+  background:
+    radial-gradient(
+      140% 120% at 100% 0%,
+      rgba(45, 212, 191, 0.14),
+      transparent 60%
+    ),
+    linear-gradient(180deg, var(--card), var(--bg-soft));
+  border-color: rgba(45, 212, 191, 0.35);
+}
+
+.card__label {
+  margin: 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.card__value {
+  margin: 2px 0 0;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.card__number {
+  font-size: clamp(2rem, 9vw, 2.6rem);
+  font-weight: 750;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+}
+
+.card--primary .card__number {
+  font-size: clamp(2.8rem, 16vw, 4.4rem);
+  line-height: 1;
+}
+
+.card__unit {
+  font-size: 1rem;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.card__value--empty .card__number {
+  color: var(--text-faint);
+}
+
+.card__trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  font-weight: 600;
+}
+
+.trend--rising {
+  color: var(--rising);
+}
+.trend--falling {
+  color: var(--falling);
+}
+.trend--stable {
+  color: var(--stable);
+}
+.trend--unknown {
+  color: var(--unknown);
+}
+
+.icon {
+  display: inline-flex;
+}
+.icon svg {
+  display: block;
+}
+
+.card__time {
+  margin: auto 0 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.card__hint {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.78rem;
+}
+
+/* --- Fuß --- */
+
+.app-footer {
+  margin-top: 26px;
+  padding-top: 16px;
+  border-top: 1px solid var(--card-edge);
+  color: var(--text-faint);
+  font-size: 0.78rem;
+}
+
+.app-footer p {
+  margin: 0 0 8px;
+}
+
+/* --- Meldungen / Buttons --- */
+
+.message {
+  font-size: 1rem;
+  color: var(--text-dim);
+}
+.message--error {
+  color: var(--warm);
+}
+
+.retry {
+  font: inherit;
+  font-weight: 600;
+  color: var(--bg);
+  background: var(--water);
+  border: 0;
+  border-radius: 999px;
+  padding: 10px 22px;
+  cursor: pointer;
+}
+.retry:hover {
+  filter: brightness(1.05);
+}
+.retry:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: 3px;
+}
+
+/* --- Responsiv / größere Schirme --- */
+
+@media (min-width: 560px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .card--primary {
+    grid-column: 1 / -1;
+  }
+}
+
+/* --- Light-Mode-Fallback (Barrierefreiheit / Nutzerpräferenz) --- */
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #f3f6f7;
+    --bg-soft: #ffffff;
+    --card: #ffffff;
+    --card-edge: #dde5e8;
+    --text: #16242b;
+    --text-dim: #4c5f68;
+    --text-faint: #7a8a92;
+    --water: #0c8f7e;
+    --warm: #c8631f;
+    --cool: #1f6f9e;
+    --neutral: #5b6f78;
+    --shadow: 0 6px 20px rgba(20, 40, 50, 0.1);
+  }
+  html {
+    color-scheme: light;
+  }
+}
+
+/* --- Reduzierte Bewegung --- */
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
+}
