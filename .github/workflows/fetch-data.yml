@@ -1,16 +1,16 @@
 name: Fetch Eisbach data
 
-# Holt alle 15 Minuten die Quelldaten (HND/GKD/Open-Meteo), normalisiert sie zu
-# JSON und committet public/data/*.json. Dadurch entstehen Live-Werte und Historie
-# serverlos und kostenlos.
+# Holt alle 15 Minuten die Quelldaten (HND/GKD/Open-Meteo), normalisiert sie zu JSON
+# und veröffentlicht NUR current.json + history.json im separaten `data`-Branch.
 #
-# HINWEIS (M1): scripts/fetch_data.py ist noch ein Platzhalter (kommt in M3).
-# Der Cron-Trigger ist daher noch auskommentiert, um leere Commits zu vermeiden.
+# Wichtig für Kosten/Wartung: Dieser Job baut die App NICHT neu. Der `data`-Branch wird
+# als kompakter Single-Commit force-gepusht (bleibt winzig). Die laufende Historie wird
+# vorher aus dem `data`-Branch gelesen und vom Skript fortgeschrieben (idempotent).
 
 on:
   workflow_dispatch:
-  # schedule:
-  #   - cron: "*/15 * * * *"
+  schedule:
+    - cron: "*/15 * * * *"
 
 permissions:
   contents: write
@@ -23,20 +23,39 @@ jobs:
   fetch:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout (Code/Skript)
+        uses: actions/checkout@v4
+
+      - name: Vorhandenen data-Branch auschecken (falls vorhanden)
+        uses: actions/checkout@v4
+        with:
+          ref: data
+          path: data-branch
+        continue-on-error: true
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Fetch & normalise
-        run: python3 scripts/fetch_data.py
-      - name: Commit data if changed
+
+      - name: Bisherige Daten als Ausgangspunkt übernehmen
         run: |
-          git config user.name "eisbach-bot"
-          git config user.email "bot@users.noreply.github.com"
-          git add public/data/
-          if git diff --staged --quiet; then
-            echo "Keine Datenänderung."
-          else
-            git commit -m "data: update $(date -u +%Y-%m-%dT%H:%MZ)"
-            git push
-          fi
+          mkdir -p public/data
+          cp data-branch/current.json public/data/ 2>/dev/null || true
+          cp data-branch/history.json public/data/ 2>/dev/null || true
+
+      - name: Quellen abrufen & normalisieren
+        run: python3 scripts/fetch_data.py
+
+      - name: In data-Branch veröffentlichen
+        run: |
+          out=$(mktemp -d)
+          cp public/data/current.json public/data/history.json "$out/"
+          cd "$out"
+          git init -q -b data
+          git add current.json history.json
+          git -c user.name="eisbach-bot" \
+              -c user.email="bot@users.noreply.github.com" \
+              commit -q -m "data: $(date -u +%Y-%m-%dT%H:%MZ)"
+          git push -q --force \
+            "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" \
+            data

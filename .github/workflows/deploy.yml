@@ -29,11 +29,12 @@ jobs:
           cache: "npm"
       - run: npm ci
       - name: Build
-        # BASE_PATH muss dem Repo-Namen entsprechen, z. B. "/eisbachwelle/".
-        # Wird in M8 final gesetzt; ${{ github.event.repository.name }} leitet ihn ab.
         run: npm run build
         env:
+          # Basis-Pfad = Repo-Name (Project Pages), z. B. "/eisbachwelle/".
           BASE_PATH: "/${{ github.event.repository.name }}/"
+          # Produktion liest die Live-Daten aus dem data-Branch (kein Rebuild bei Updates).
+          VITE_DATA_BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/data/"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -1,0 +1,31 @@
+{
+  "fetchedAt": "2026-06-03T13:28:46Z",
+  "sources": {
+    "flow": "HND / GKD Bayern",
+    "level": "HND / GKD Bayern",
+    "waterTemp": "GKD Bayern",
+    "airTemp": "Open-Meteo"
+  },
+  "measurements": {
+    "flow": {
+      "value": 22.3,
+      "unit": "m³/s",
+      "t": "2026-06-03T13:15:00Z"
+    },
+    "level": {
+      "value": 144.0,
+      "unit": "cm",
+      "t": "2026-06-03T13:15:00Z"
+    },
+    "waterTemp": {
+      "value": 16.3,
+      "unit": "°C",
+      "t": "2026-06-03T13:15:00Z"
+    },
+    "airTemp": {
+      "value": 16.0,
+      "unit": "°C",
+      "t": "2026-06-03T13:15:00Z"
+    }
+  }
+}

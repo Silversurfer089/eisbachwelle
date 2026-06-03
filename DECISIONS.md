@@ -32,6 +32,20 @@ Jede wichtige Entscheidung in 1–2 Sätzen mit Begründung. Neueste oben.
     nur erwogen, wenn der Cron-Weg an Nutzungsbedingungen oder Technik scheitert.
 - **Adapter-Schicht.** Quellenzugriff ist im Cron-Skript bzw. `loader.ts` gekapselt; die UI
   kennt nur das interne Modell. Formatänderungen einer Quelle brechen nur den Adapter.
+- **Daten im separaten `data`-Branch, App liest per Raw-URL (kein Rebuild).** Würde jeder
+  15-Min-Daten-Commit einen vollen App-Rebuild+Deploy auslösen, wären es ~96 Deploys/Tag und
+  das kostenlose Actions-Budget (2000 Min/Monat) wäre überschritten. Daher: Der Cron schreibt
+  `current.json`/`history.json` ausschließlich in einen kompakten, force-gepushten `data`-Branch
+  (~30 s/Lauf, kein Build). Die Produktions-App lädt sie per
+  `https://raw.githubusercontent.com/<user>/<repo>/data/…` (sendet `access-control-allow-origin: *`,
+  300 s Cache — am 2026-06-03 verifiziert). Der App-Deploy läuft nur bei Code-Änderungen auf `main`.
+  Vorteile: `main` bleibt sauber, Budget niedrig, weiterhin rein serverlos.
+- **Cron-Resilienz.** Liefert ein Lauf keinen einzigen Aktuellwert (alle Quellen aus), bleibt ein
+  vorhandenes gutes `current.json` erhalten (kein Überschreiben mit `null`); die Historie wird nie
+  verkürzt, nur ergänzt/ausgedünnt. HND-/Open-Meteo-Historie wird jeden Lauf neu gemerged
+  (idempotent), wodurch verpasste Läufe sich selbst heilen.
+- **Lokale Entwicklung & Fallback:** `VITE_DATA_BASE_URL` ist standardmäßig `/data/`
+  (Vite serviert `public/data/`); ein eingecheckter Seed-Stand macht den Klon sofort lauffähig.
 
 ## Verifizierte Endpunkte
 
