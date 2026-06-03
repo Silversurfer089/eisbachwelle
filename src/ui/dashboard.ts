@@ -107,6 +107,7 @@ function statusLine(vm: DashboardVM, now: Date): HTMLElement {
   return el("div", { class: "status" }, children);
 }
 
+/** Live-Teil (Kopf + Karten). Wird bei jeder Aktualisierung neu gerendert. */
 export function renderDashboard(
   vm: DashboardVM,
   now: Date = new Date(),
@@ -123,10 +124,13 @@ export function renderDashboard(
     vm.metrics.map((m) => metricCard(m, now)),
   );
 
-  const footer = el("footer", { class: "app-footer" }, [
+  return el("div", { class: "dashboard" }, [header, grid]);
+}
+
+/** Statischer Fuß mit Quellen-Attribution und Disclaimer. */
+export function renderFooter(): HTMLElement {
+  return el("footer", { class: "app-footer" }, [
     el("p", { class: "attribution" }, [de.attribution]),
     el("p", { class: "disclaimer" }, [de.disclaimer]),
   ]);
-
-  return el("div", { class: "app-shell" }, [header, grid, footer]);
 }

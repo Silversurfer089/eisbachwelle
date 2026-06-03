@@ -12,6 +12,14 @@ export const METRIC_KEYS: readonly MetricKey[] = [
   "airTemp",
 ];
 
+/** Anzeige-Einheit je Messgröße (für Achsen/Tooltips, wenn kein Reading vorliegt). */
+export const METRIC_UNIT: Record<MetricKey, string> = {
+  flow: "m³/s",
+  level: "cm",
+  waterTemp: "°C",
+  airTemp: "°C",
+};
+
 /** Trendrichtung einer Messgröße. "unknown", wenn zu wenige Daten vorliegen. */
 export type Trend = "rising" | "falling" | "stable" | "unknown";
 

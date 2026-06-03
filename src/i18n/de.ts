@@ -35,6 +35,20 @@ export const de = {
     retry: "Erneut versuchen",
   },
 
+  history: {
+    title: "Verlauf",
+    metricGroupLabel: "Messgröße wählen",
+    rangeGroupLabel: "Zeitraum wählen",
+    ranges: {
+      "24h": "24 Std.",
+      "7d": "7 Tage",
+      "30d": "30 Tage",
+    },
+    empty: "Für diesen Zeitraum liegen noch nicht genug Daten vor.",
+    chartLabel: (metric: string, range: string) =>
+      `Verlaufsdiagramm ${metric}, Zeitraum ${range}`,
+  },
+
   sourcesLabel: "Datenquellen",
   attribution:
     "Pegel/Abfluss: Hochwassernachrichtendienst Bayern (HND) & Gewässerkundlicher Dienst Bayern (GKD). Wetter: Open-Meteo.",

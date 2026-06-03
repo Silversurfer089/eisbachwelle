@@ -1,6 +1,8 @@
 import { loadCurrent, loadHistory } from "./data/source";
+import type { HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
-import { renderDashboard } from "./ui/dashboard";
+import { renderDashboard, renderFooter } from "./ui/dashboard";
+import { createHistorySection, type HistorySection } from "./ui/history";
 import { el } from "./ui/dom";
 import { de } from "./i18n/de";
 
@@ -8,27 +10,50 @@ import { de } from "./i18n/de";
 const REFRESH_MS = 5 * 60_000;
 
 let lastVM: DashboardVM | null = null;
+let lastHistory: HistoryData | null = null;
 let timer: number | undefined;
 
-function renderLoading(root: HTMLElement): void {
+// Persistente Shell-Teile (einmal gebaut, dann nur aktualisiert).
+let dashSlot: HTMLElement | null = null;
+let historySection: HistorySection | null = null;
+
+function renderMessage(
+  root: HTMLElement,
+  text: string,
+  variant: "loading" | "error",
+  retry?: () => void,
+): void {
+  const children: HTMLElement[] = [
+    el(
+      "p",
+      {
+        class: `message ${variant === "error" ? "message--error" : ""}`,
+        role: variant === "error" ? "alert" : "status",
+      },
+      [text],
+    ),
+  ];
+  if (retry) {
+    const button = el("button", { class: "retry", type: "button" }, [
+      de.status.retry,
+    ]);
+    button.addEventListener("click", retry);
+    children.push(button);
+  }
   root.replaceChildren(
-    el("div", { class: "app-shell app-shell--message" }, [
-      el("p", { class: "message", role: "status" }, [de.status.loading]),
-    ]),
+    el("div", { class: "app-shell app-shell--message" }, children),
   );
 }
 
-function renderError(root: HTMLElement, retry: () => void): void {
-  const button = el("button", { class: "retry", type: "button" }, [
-    de.status.retry,
-  ]);
-  button.addEventListener("click", retry);
+function ensureShell(root: HTMLElement): void {
+  if (dashSlot && historySection && root.contains(dashSlot)) return;
+  dashSlot = el("div", { class: "dash-slot" });
+  historySection = createHistorySection();
   root.replaceChildren(
-    el("div", { class: "app-shell app-shell--message" }, [
-      el("p", { class: "message message--error", role: "alert" }, [
-        de.status.loadError,
-      ]),
-      button,
+    el("div", { class: "app-shell" }, [
+      dashSlot,
+      historySection.element,
+      renderFooter(),
     ]),
   );
 }
@@ -40,20 +65,30 @@ async function refresh(root: HTMLElement): Promise<void> {
       loadHistory(),
     ]);
     lastVM = present(current, history);
-    root.replaceChildren(renderDashboard(lastVM));
+    lastHistory = history;
+    ensureShell(root);
+    dashSlot!.replaceChildren(renderDashboard(lastVM));
+    historySection!.update(history);
   } catch (err) {
     console.warn("[eisbach] Aktualisierung fehlgeschlagen:", err);
-    if (lastVM) {
+    if (lastVM && lastHistory) {
       // Letzten guten Stand behalten; das Stale-Badge entsteht aus dem Alter.
-      root.replaceChildren(renderDashboard(lastVM));
+      ensureShell(root);
+      dashSlot!.replaceChildren(renderDashboard(lastVM));
+      historySection!.update(lastHistory);
     } else {
-      renderError(root, () => void refresh(root));
+      renderMessage(
+        root,
+        de.status.loadError,
+        "error",
+        () => void refresh(root),
+      );
     }
   }
 }
 
 export async function startApp(root: HTMLElement): Promise<void> {
-  renderLoading(root);
+  renderMessage(root, de.status.loading, "loading");
   await refresh(root);
 
   if (timer !== undefined) window.clearInterval(timer);
