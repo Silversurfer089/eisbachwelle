@@ -59,6 +59,12 @@ Daten-Skript lokal ausführen (schreibt nach `public/data/`):
 python3 scripts/fetch_data.py
 ```
 
+PWA-Icons neu erzeugen (reine Standardbibliothek, kein Browser nötig):
+
+```bash
+python3 scripts/make_icons.py
+```
+
 ## Deployen
 
 Auto-Deploy nach **GitHub Pages** per Git-Push auf `main` (siehe `.github/workflows/`).

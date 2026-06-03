@@ -35,6 +35,12 @@ export const de = {
     retry: "Erneut versuchen",
   },
 
+  update: {
+    available: "Neue Version verfügbar.",
+    action: "Aktualisieren",
+    offlineReady: "App ist offline verfügbar.",
+  },
+
   context: {
     title: "Einordnung",
     trendLead: "Der Abfluss ist zuletzt",
