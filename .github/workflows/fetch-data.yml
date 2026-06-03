@@ -1,0 +1,42 @@
+name: Fetch Eisbach data
+
+# Holt alle 15 Minuten die Quelldaten (HND/GKD/Open-Meteo), normalisiert sie zu
+# JSON und committet public/data/*.json. Dadurch entstehen Live-Werte und Historie
+# serverlos und kostenlos.
+#
+# HINWEIS (M1): scripts/fetch_data.py ist noch ein Platzhalter (kommt in M3).
+# Der Cron-Trigger ist daher noch auskommentiert, um leere Commits zu vermeiden.
+
+on:
+  workflow_dispatch:
+  # schedule:
+  #   - cron: "*/15 * * * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: fetch-data
+  cancel-in-progress: false
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch & normalise
+        run: python3 scripts/fetch_data.py
+      - name: Commit data if changed
+        run: |
+          git config user.name "eisbach-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add public/data/
+          if git diff --staged --quiet; then
+            echo "Keine Datenänderung."
+          else
+            git commit -m "data: update $(date -u +%Y-%m-%dT%H:%MZ)"
+            git push
+          fi
