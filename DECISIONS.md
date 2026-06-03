@@ -8,7 +8,8 @@ Jede wichtige Entscheidung in 1–2 Sätzen mit Begründung. Neueste oben.
   läuft auf GitHub Pages ohne laufende Infrastruktur.
 - **Vanilla TypeScript statt Framework.** Vermeidet Framework-Churn (Migrationen) und hält das
   Bundle klein; die UI-Komplexität (ein Dashboard + Charts) rechtfertigt kein React/Vue/Svelte.
-- **Vite 5 als Build-Tool.** Schnell, stabil, erstklassiges PWA-Plugin, kein Lock-in.
+- **Vite als Build-Tool** (aktuell auf Version 8 gepinnt). Schnell, stabil, erstklassiges
+  PWA-Plugin, kein Lock-in. Zum Setup-Zeitpunkt jeweils neueste stabile Majorversion gewählt.
 - **TypeScript strict** (inkl. `noUncheckedIndexedAccess`, `exactOptionalPropertyTypes`):
   fängt Datenfehler früh, wichtig beim Parsen externer, unsicherer Quellen.
 - **Chart.js 4 für Diagramme.** Lange etabliert, aktiv gepflegt, gute Types, akzeptables Bundle;
@@ -34,16 +35,70 @@ Jede wichtige Entscheidung in 1–2 Sätzen mit Begründung. Neueste oben.
 
 ## Verifizierte Endpunkte
 
-> ⚠️ **Noch ausstehend (vor GATE 2 / M2).** HND Bayern hat keine offiziell dokumentierte
-> JSON-API. Die echten Netzwerk-Requests der Live-Seite und der GKD-CSV-Download werden in M2
-> inspiziert und hier mit URL + Antwortformat + Stand-Datum dokumentiert. Nichts wird geraten;
-> nicht zweifelsfrei Verifizierbares wird ausdrücklich als unsicher markiert.
+**Verifiziert am 2026-06-03** durch direkte HTTP-Abrufe (curl) und Parsing der Antworten.
+HND/GKD bieten keine dokumentierte JSON-API; genutzt werden öffentlich erreichbare
+HTML-Tabellen-Endpunkte (GET, ohne Login, ohne Formular). Alle drei liefern HTTP 200.
 
-| Quelle                      | Zweck            | Endpunkt | Format | Verifiziert am |
-| --------------------------- | ---------------- | -------- | ------ | -------------- |
-| HND Bayern (Pegel 16515005) | Abfluss, Pegel   | _TBD_    | _TBD_  | _offen_        |
-| GKD Bayern                  | Wassertemperatur | _TBD_    | _TBD_  | _offen_        |
-| Open-Meteo                  | Lufttemperatur   | _TBD_    | JSON   | _offen_        |
+### 1. GKD `/messwerte` — frische Aktuellwerte (15-Min, letzte ~2 h)
+
+Liefert eine HTML-Tabelle der jüngsten ~7 Viertelstundenwerte. **Quelle für die
+Aktuellwerte** von Abfluss, Wasserstand und (nur hier verfügbar) Wassertemperatur.
+
+```
+https://www.gkd.bayern.de/de/fluesse/{thema}/bayern/muenchen-himmelreichbruecke-16515005/messwerte
+  {thema} ∈ { wasserstand | abfluss | wassertemperatur }
+```
+
+- Format: `<td>DD.MM.YYYY HH:MM</td><td class="center">WERT</td>`
+- Einheiten/Beispielwerte: Wasserstand `144` cm · Abfluss `22,3` m³/s · Wassertemp `16,3` °C
+- **Dezimaltrennzeichen ist Komma** (`22,3`) → im Cron zu Punkt normalisieren.
+- `?beginn=DD.MM.YYYY&ende=DD.MM.YYYY` existiert, ändert aber nur die Grafik, **nicht** die
+  Tabelle (bleibt bei ~7 Zeilen). Daher nicht zum Backfill nutzbar.
+- Korrekte Messstellen-URL via Weiterleitung ermittelbar:
+  `https://www.gkd.bayern.de/de/search/go?suche=fluesse.{thema}&id=16515005`
+
+### 2. HND `/tabelle` — Historie-Bootstrap (stündlich, ~6 Tage)
+
+Liefert ~159 **stündliche** Werte (~6 Tage). **Quelle zum Bootstrappen der Abfluss-/
+Pegel-Historie.** Keine Wassertemperatur.
+
+```
+https://www.hnd.bayern.de/pegel/isar/muenchen-himmelreichbruecke-16515005/tabelle?methode={methode}
+  {methode} ∈ { wasserstand | abfluss }
+```
+
+- Format: HTML-Tabelle, Zeit `DD.MM.YYYY HH:MM`, Komma-Dezimal (identisch zu GKD).
+
+### 3. Open-Meteo — Lufttemperatur (aktuell + stündliche Historie)
+
+Dokumentierte JSON-API, kein Key. Koordinaten Himmelreichbrücke ~`48.144, 11.586`.
+
+```
+Aktuell:   https://api.open-meteo.com/v1/forecast?latitude=48.144&longitude=11.586&current=temperature_2m&timezone=Europe%2FBerlin
+Historie:  https://api.open-meteo.com/v1/forecast?latitude=48.144&longitude=11.586&hourly=temperature_2m&past_days=7&forecast_days=1&timezone=UTC
+```
+
+- `current.temperature_2m` (°C, 15-Min-Intervall) bzw. `hourly.{time[],temperature_2m[]}`
+  (192 Stundenwerte = 7 Tage + heute). Punkt-Dezimal, ISO-Zeit.
+
+### Quellenstrategie (Zusammenfassung)
+
+| Metrik                | Aktuellwert            | Historie-Bootstrap                  |
+| --------------------- | ---------------------- | ----------------------------------- |
+| Abfluss (m³/s)        | GKD messwerte (15-Min) | HND tabelle (6 d, stündl.)          |
+| Wasserstand (cm)      | GKD messwerte (15-Min) | HND tabelle (6 d, stündl.)          |
+| Wassertemperatur (°C) | GKD messwerte (15-Min) | _kein Backfill_ → wächst über Zeit  |
+| Lufttemperatur (°C)   | Open-Meteo current     | Open-Meteo past_days (7 d, stündl.) |
+
+> **Annahme (zu prüfen):** GKD/HND-Zeitstempel sind **lokale Zeit Europe/Berlin (DST-bewusst)**.
+> Begründung: Der jüngste GKD-Wert (`15:00`) deckt sich mit der echten Münchner Wanduhrzeit
+> (= Open-Meteo `current` in Europe/Berlin), nicht mit UTC oder fixem MEZ. Der Cron konvertiert
+> nach UTC-ISO via `zoneinfo("Europe/Berlin")`. Im Winter (MEZ) erneut gegenprüfen.
+
+> **Nutzungsbedingungen:** HND/GKD-Daten sind amtliche Umweltdaten des Freistaats Bayern
+> (LfU). Vor Produktivschaltung sind die Nutzungs-/Lizenzhinweise der Portale zu prüfen und
+> die Quelle sichtbar zu attribuieren (in der App + README). Abrufe bleiben sparsam
+> (~alle 15 Min). Open-Meteo: Free-Tier, Attribution gemäß deren Bedingungen (CC-BY).
 
 ## Hosting & Deploy
 
