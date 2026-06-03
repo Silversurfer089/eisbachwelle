@@ -2,6 +2,7 @@ import { loadCurrent, loadHistory } from "./data/source";
 import type { HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
 import { renderDashboard, renderFooter } from "./ui/dashboard";
+import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
 import { el } from "./ui/dom";
 import { de } from "./i18n/de";
@@ -15,6 +16,7 @@ let timer: number | undefined;
 
 // Persistente Shell-Teile (einmal gebaut, dann nur aktualisiert).
 let dashSlot: HTMLElement | null = null;
+let contextSlot: HTMLElement | null = null;
 let historySection: HistorySection | null = null;
 
 function renderMessage(
@@ -46,12 +48,15 @@ function renderMessage(
 }
 
 function ensureShell(root: HTMLElement): void {
-  if (dashSlot && historySection && root.contains(dashSlot)) return;
+  if (dashSlot && contextSlot && historySection && root.contains(dashSlot))
+    return;
   dashSlot = el("div", { class: "dash-slot" });
+  contextSlot = el("div", { class: "context-slot" });
   historySection = createHistorySection();
   root.replaceChildren(
     el("div", { class: "app-shell" }, [
       dashSlot,
+      contextSlot,
       historySection.element,
       renderFooter(),
     ]),
@@ -68,6 +73,7 @@ async function refresh(root: HTMLElement): Promise<void> {
     lastHistory = history;
     ensureShell(root);
     dashSlot!.replaceChildren(renderDashboard(lastVM));
+    contextSlot!.replaceChildren(renderContextPanel(lastVM));
     historySection!.update(history);
   } catch (err) {
     console.warn("[eisbach] Aktualisierung fehlgeschlagen:", err);
@@ -75,6 +81,7 @@ async function refresh(root: HTMLElement): Promise<void> {
       // Letzten guten Stand behalten; das Stale-Badge entsteht aus dem Alter.
       ensureShell(root);
       dashSlot!.replaceChildren(renderDashboard(lastVM));
+      contextSlot!.replaceChildren(renderContextPanel(lastVM));
       historySection!.update(lastHistory);
     } else {
       renderMessage(

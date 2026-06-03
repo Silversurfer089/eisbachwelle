@@ -1,4 +1,8 @@
 import { computeTrend } from "../data/domain/trend";
+import {
+  describeContext,
+  type DistributionContext,
+} from "../data/domain/context";
 import { freshestTimestamp, isStale } from "../data/loader";
 import { METRIC_KEYS } from "../data/model";
 import type {
@@ -24,6 +28,10 @@ export interface DashboardVM {
   freshestAt: string | null;
   stale: boolean;
   sources: Record<string, string>;
+  /** Trend des Abflusses (Hauptgröße) – bequemer Direktzugriff fürs Einordnungs-Panel. */
+  flowTrend: Trend;
+  /** Einordnung des aktuellen Abflusses in die bisherige Historie, oder null. */
+  flowContext: DistributionContext | null;
 }
 
 export function present(
@@ -37,11 +45,18 @@ export function present(
     trend: computeTrend(history.series[key]),
   }));
 
+  const flowReading = current.measurements.flow;
+  const flowContext = flowReading
+    ? describeContext(history.series.flow, flowReading.value)
+    : null;
+
   return {
     metrics,
     fetchedAt: current.fetchedAt,
     freshestAt: freshestTimestamp(current),
     stale: isStale(current, now),
     sources: current.sources,
+    flowTrend: metrics.find((m) => m.key === "flow")?.trend ?? "unknown",
+    flowContext,
   };
 }

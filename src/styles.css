@@ -225,6 +225,80 @@ body {
   font-size: 0.78rem;
 }
 
+/* --- Einordnung --- */
+
+.context {
+  margin-top: 28px;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius);
+  padding: 18px 18px 16px;
+}
+
+.context__title {
+  margin: 0 0 10px;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.context__trend {
+  margin: 0 0 6px;
+  font-size: 1.05rem;
+}
+
+.context__percentile {
+  margin: 12px 0 10px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.gauge {
+  margin: 6px 0 10px;
+}
+
+.gauge__track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    rgba(138, 160, 171, 0.25),
+    rgba(45, 212, 191, 0.25)
+  );
+  overflow: visible;
+}
+
+.gauge__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--cool), var(--water));
+}
+
+.gauge__marker {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 3px solid var(--water);
+  transform: translate(-50%, -50%);
+}
+
+.context__range,
+.context__building,
+.context__insufficient,
+.context__note {
+  margin: 6px 0 0;
+  color: var(--text-faint);
+  font-size: 0.82rem;
+}
+
+.context__note {
+  font-style: italic;
+}
+
 /* --- Verlauf / Charts --- */
 
 .history {

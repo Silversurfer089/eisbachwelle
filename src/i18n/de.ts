@@ -35,6 +35,23 @@ export const de = {
     retry: "Erneut versuchen",
   },
 
+  context: {
+    title: "Einordnung",
+    trendLead: "Der Abfluss ist zuletzt",
+    trendUnknown: "Zum aktuellen Kurzzeit-Trend liegen zu wenige Werte vor.",
+    // p = gerundeter Perzentilrang, days = abgedeckte Tage
+    percentile: (p: number, daysLabel: string) =>
+      `Aktuell höher als rund ${p} % der Messwerte ${daysLabel}.`,
+    rangeLabel: (lo: string, hi: string) => `Bisheriger Bereich: ${lo} – ${hi}`,
+    note: "Orientierung aus den bisher erfassten Daten – kein Qualitäts-, Eignungs- oder Sicherheitsurteil.",
+    building:
+      "Die Datenbasis wächst noch; die Einordnung wird mit der Zeit aussagekräftiger.",
+    insufficient:
+      "Noch zu wenig Verlaufsdaten für eine belastbare Einordnung. Sie entsteht, sobald genügend Messwerte gesammelt sind.",
+    daysAgo: (n: number) =>
+      n >= 1 ? `der letzten ~${n} Tage` : "der letzten Stunden",
+  },
+
   history: {
     title: "Verlauf",
     metricGroupLabel: "Messgröße wählen",
