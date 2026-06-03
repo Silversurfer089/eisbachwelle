@@ -86,4 +86,10 @@ nur der Adapter, nie die UI.
 
 ## Status
 
-Siehe Task-Liste / README „Roadmap". Aktueller Stand: **M1 (Scaffold)**.
+**V1 funktionsfähig.** Datenschicht (getestet, 43 Tests grün), serverloser Cron
+(`scripts/fetch_data.py` → `data`-Branch), Dashboard, Verlauf (24h/7d/30d), Einordnung
+(Perzentil) und PWA (installierbar, offline, Update-Hinweis) stehen. Offen vor Produktiv:
+Deploy nach GitHub Pages (siehe README) und Prüfung der Quellen-Nutzungsbedingungen.
+
+Wichtige Pfade: Quellen-Adapter nur in `scripts/fetch_data.py` (Roh→JSON) und
+`src/data/loader.ts`/`source.ts` (JSON→Modell). UI nie mit Geschäftslogik mischen.

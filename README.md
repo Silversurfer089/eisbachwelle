@@ -8,7 +8,9 @@ Eine kleine, schnelle **Progressive Web App** für den Live-Zustand der **Eisbac
 Die App ist für die Community gedacht und verdrängt bestehende Angebote (z. B. eisbachwetter.de)
 nicht — sie ergänzt sie.
 
-> ⚠️ Projektstatus: **in Aufbau (M1 — Scaffold)**. Noch keine Live-Daten verdrahtet.
+> Projektstatus: **V1 funktionsfähig** — Dashboard, Verlauf, Einordnung und PWA stehen;
+> Datenschicht getestet, serverloser Daten-Cron eingerichtet. Vor dem Produktivbetrieb sind
+> nur noch das Deploy (siehe unten) und die Prüfung der Quellen-Nutzungsbedingungen offen.
 
 ## Was sie kann (Ziel V1)
 
@@ -65,10 +67,40 @@ PWA-Icons neu erzeugen (reine Standardbibliothek, kein Browser nötig):
 python3 scripts/make_icons.py
 ```
 
-## Deployen
+## Deployen (GitHub Pages, kostenlos)
 
-Auto-Deploy nach **GitHub Pages** per Git-Push auf `main` (siehe `.github/workflows/`).
-Der Basis-Pfad wird über `BASE_PATH` (z. B. `/<repo>/`) gesetzt. Details folgen mit M3/M8.
+Einmalige Einrichtung (ca. 10 Minuten):
+
+1. **Repo anlegen** (öffentlich) und diesen Ordner pushen:
+
+   ```bash
+   git remote add origin https://github.com/<user>/<repo>.git
+   git push -u origin main
+   ```
+
+2. **GitHub Pages aktivieren:** Repo → _Settings_ → _Pages_ →
+   _Build and deployment_ → _Source_ = **GitHub Actions**.
+
+3. **Actions-Schreibrechte:** Repo → _Settings_ → _Actions_ → _General_ →
+   _Workflow permissions_ = **Read and write permissions** (damit der Daten-Cron in den
+   `data`-Branch pushen darf).
+
+4. **Erststart der Daten:** Repo → _Actions_ → Workflow **„Fetch Eisbach data"** →
+   _Run workflow_. Das erzeugt den `data`-Branch mit `current.json`/`history.json`.
+   Danach läuft er automatisch alle 15 Minuten.
+
+5. **App-Deploy:** Bei jedem Push auf `main` baut **„Deploy to GitHub Pages"** die App und
+   veröffentlicht sie. Die Seite liegt dann unter `https://<user>.github.io/<repo>/`.
+
+### Wie das ohne laufende Kosten funktioniert
+
+- Der **Daten-Cron** schreibt nur zwei kleine JSON-Dateien in den separaten `data`-Branch
+  (kein App-Rebuild). Die App lädt sie per Raw-URL des `data`-Branches.
+- Der **App-Deploy** läuft nur bei Code-Änderungen auf `main`.
+- Der `BASE_PATH` (z. B. `/<repo>/`) und die Daten-URL werden im Deploy-Workflow automatisch
+  aus dem Repo-Namen abgeleitet — es ist nichts manuell einzutragen.
+
+Details und Begründung der Architektur: [`DECISIONS.md`](./DECISIONS.md).
 
 ## Mitmachen
 

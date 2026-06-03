@@ -121,6 +121,35 @@ Historie:  https://api.open-meteo.com/v1/forecast?latitude=48.144&longitude=11.5
 - **Keine eigene Domain** (Nutzerwunsch). URL: `https://<user>.github.io/<repo>/`.
   Vite `base` wird im Deploy über `BASE_PATH` gesetzt.
 
+## UI, Charts & Einordnung
+
+- **Framework-freies DOM-Rendering** über einen winzigen `el()`-Helfer (kein `innerHTML` mit
+  Daten → kein XSS). Presenter (`present.ts`) trennt Daten/Domäne sauber von der Render-Schicht.
+- **Persistente, getrennte Slots.** Dashboard und Einordnung werden je Aktualisierung neu
+  gerendert; die Historie-Sektion bleibt bestehen und wird nur aktualisiert (erhält die
+  Tab-Auswahl, vermeidet Chart-Neuaufbau).
+- **Chart.js lazy geladen** (dynamischer Import). Hauptbundle ~6–7 KB gzip, Chart.js (~56 KB
+  gzip) als separater Chunk erst bei Bedarf → schneller Erststart. Kein Datums-Adapter:
+  lineare X-Achse + eigene Intl-Formatierung spart die `date-fns`-Abhängigkeit.
+- **Einordnung ohne Werturteil.** `describeContext` leitet nur einen Perzentilrang aus der
+  vorhandenen Historie ab und nennt den Datenbasis-Umfang; keine festen „gut/schlecht"-
+  Schwellen. Unter ~25 Tagen Datenbasis erscheint ein „wächst noch"-Hinweis; bei zu wenig
+  Daten gar keine Aussage. Disclaimer: Orientierung, kein Qualitäts-/Sicherheitsurteil.
+- **Ehrliche Zustände.** Stale-Badge aus dem Alter des jüngsten Werts; bei Netzfehler letzter
+  guter Stand statt Fehlerseite; Daten-Fetch mit 15 s Timeout, damit ein hängender Request die
+  Aktualisierung nicht blockiert.
+
+## PWA
+
+- **Icons per `scripts/make_icons.py`** aus reiner Python-Standardbibliothek erzeugt (kein
+  Browser, keine Bild-Dependency) — reproduzierbar im Repo.
+- **Update-Strategie „prompt".** Neue Service-Worker werden nicht automatisch aktiv, sondern
+  über einen unaufdringlichen „Neue Version"-Toast bestätigt (kein überraschender Reload).
+- **Offline:** App-Shell via Workbox-Precache + `navigateFallback` auf `index.html`;
+  Datendateien per `StaleWhileRevalidate`. App startet offline mit letztem Stand.
+- **Light-Mode-Fallback** via `prefers-color-scheme` und `prefers-reduced-motion` respektiert
+  (Barrierefreiheit), obwohl Dark Mode der Standard ist.
+
 ## Lizenz
 
 - **MIT.** Permissiv, macht transparent, dass niemand verdient, lädt zum Mitmachen ein.

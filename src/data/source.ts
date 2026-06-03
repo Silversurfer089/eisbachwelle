@@ -7,9 +7,14 @@ function dataBase(): string {
   return raw.endsWith("/") ? raw : raw + "/";
 }
 
+const FETCH_TIMEOUT_MS = 15_000;
+
 async function fetchJson(name: string, signal?: AbortSignal): Promise<unknown> {
   const url = dataBase() + name;
-  const res = await fetch(url, signal ? { signal } : {});
+  // Eigener Timeout, damit ein hängender Request die Aktualisierung nicht blockiert.
+  const timeout = AbortSignal.timeout(FETCH_TIMEOUT_MS);
+  const sig = signal ? AbortSignal.any([signal, timeout]) : timeout;
+  const res = await fetch(url, { signal: sig });
   if (!res.ok) {
     throw new Error(`Laden von ${name} fehlgeschlagen: HTTP ${res.status}`);
   }
