@@ -76,6 +76,23 @@ body {
   margin-bottom: 22px;
 }
 
+.app-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.app-logo {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.app-brand__text {
+  min-width: 0;
+}
+
 .app-title {
   margin: 0;
   font-size: clamp(1.6rem, 6vw, 2.1rem);

@@ -112,9 +112,21 @@ export function renderDashboard(
   vm: DashboardVM,
   now: Date = new Date(),
 ): HTMLElement {
+  const logo = document.createElement("img");
+  logo.src = `${import.meta.env.BASE_URL}favicon.svg`;
+  logo.alt = "";
+  logo.className = "app-logo";
+  logo.width = 44;
+  logo.height = 44;
+
   const header = el("header", { class: "app-header" }, [
-    el("h1", { class: "app-title" }, [de.appName]),
-    el("p", { class: "app-location" }, [de.location]),
+    el("div", { class: "app-brand" }, [
+      logo,
+      el("div", { class: "app-brand__text" }, [
+        el("h1", { class: "app-title" }, [de.appName]),
+        el("p", { class: "app-location" }, [de.location]),
+      ]),
+    ]),
     statusLine(vm, now),
   ]);
 
