@@ -53,6 +53,13 @@ Jede wichtige Entscheidung in 1–2 Sätzen mit Begründung. Neueste oben.
 HND/GKD bieten keine dokumentierte JSON-API; genutzt werden öffentlich erreichbare
 HTML-Tabellen-Endpunkte (GET, ohne Login, ohne Formular). Alle drei liefern HTTP 200.
 
+> **Update 2026-06-07:** Der Endpunkt `/messwerte/tabelle` (Suffix `/tabelle`) liefert
+> **~6 Tage in 15-Min-Auflösung (≈651 Werte) für alle drei Wassergrößen — inkl.
+> Wassertemperatur**. Er ist damit Aktuellwert UND Historie-Backfill in einem und ersetzt
+> die frühere Kombi „GKD `/messwerte` (nur ~2 h) + HND-Backfill". HND bleibt nur noch als
+> Fallback für Abfluss/Pegel. Vorteil: 15-Min statt stündlich, und die Wassertemperatur hat
+> nun sofort echte Historie (vorher nur ab Cron-Start).
+
 ### 1. GKD `/messwerte` — frische Aktuellwerte (15-Min, letzte ~2 h)
 
 Liefert eine HTML-Tabelle der jüngsten ~7 Viertelstundenwerte. **Quelle für die

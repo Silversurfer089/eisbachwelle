@@ -148,10 +148,12 @@ def parse_html_table(html: str) -> list[Point]:
 
 
 def fetch_gkd(metric: str) -> list[Point]:
+    # /messwerte/tabelle liefert ~6 Tage in 15-Min-Auflösung (≈651 Werte) – auch für
+    # Wassertemperatur. Das ist zugleich Aktuellwert (jüngste Zeile) und Historie-Backfill.
     thema = GKD_THEMA[metric]
     url = (
         f"https://www.gkd.bayern.de/de/fluesse/{thema}/bayern/"
-        f"muenchen-himmelreichbruecke-{PEGEL_ID}/messwerte"
+        f"muenchen-himmelreichbruecke-{PEGEL_ID}/messwerte/tabelle"
     )
     return parse_html_table(http_get(url))
 
@@ -277,29 +279,21 @@ def build() -> None:
     history = load_existing_history()
     current: dict[str, dict | None] = {m: None for m in UNITS}
 
-    # --- Wasser-Metriken: GKD (aktuell, 15-Min) + HND (Historie-Backfill) ---
+    # --- Wasser-Metriken: GKD /messwerte/tabelle (6 d, 15-Min) als Hauptquelle für
+    #     Aktuellwert UND Historie; HND nur als Fallback für Abfluss/Pegel, falls GKD ausfällt.
+    def set_current(metric: str, newest: Point) -> None:
+        current[metric] = {"value": newest.v, "unit": UNITS[metric], "t": newest.t}
+
     for metric in ("flow", "level", "waterTemp"):
         gkd = safe(f"GKD {metric}", lambda metric=metric: fetch_gkd(metric)) or []
         if gkd:
-            newest = max(gkd, key=lambda p: p.t)
-            current[metric] = {
-                "value": newest.v,
-                "unit": UNITS[metric],
-                "t": newest.t,
-            }
+            set_current(metric, max(gkd, key=lambda p: p.t))
             history[metric] = merge_points(history[metric], gkd)
-
-        if metric in HND_METHODE:
+        elif metric in HND_METHODE:  # GKD aus -> HND-Fallback (stündlich, ~6 d)
             hnd = safe(f"HND {metric}", lambda metric=metric: fetch_hnd(metric)) or []
             if hnd:
                 history[metric] = merge_points(history[metric], hnd)
-                if current[metric] is None:  # GKD ausgefallen -> HND als Aktuellwert
-                    newest = max(hnd, key=lambda p: p.t)
-                    current[metric] = {
-                        "value": newest.v,
-                        "unit": UNITS[metric],
-                        "t": newest.t,
-                    }
+                set_current(metric, max(hnd, key=lambda p: p.t))
 
     # --- Lufttemperatur: Open-Meteo ---
     om = safe("Open-Meteo", fetch_open_meteo)
