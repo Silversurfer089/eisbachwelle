@@ -1,20 +1,25 @@
-/* Eisbachwelle — warmer Dark-Mode (Stil B). Mobile-first, sehr leichtes CSS,
-   keine Framework-Abhängigkeit. Farben als Custom Properties für einfachen Wechsel. */
+/* Eisbachwelle — Markenpalette (Karo-Wellen-Logo): Nachtblau + Türkis + Creme,
+   Koralle als 90er-Akzent. Dezent-retro, Daten bleiben im Vordergrund. Mobile-first,
+   sehr leichtes CSS, keine Framework-Abhängigkeit. Farben als Custom Properties. */
 
 :root {
-  /* Warmer, nicht ganz schwarzer Hintergrund + Wasser-Teal + warmer Bernstein-Akzent. */
-  --bg: #0e1418;
-  --bg-soft: #161e24;
-  --card: #1b242b;
-  --card-edge: #2a363f;
-  --text: #eef3f5;
-  --text-dim: #9fb0b9;
-  --text-faint: #6f818b;
+  /* Markenpalette (an das Karo-Wellen-Logo angeglichen): Nachtblau + Türkis + Creme,
+     Koralle als warmer 90er-Akzent. */
+  --bg: #1a1a2e; /* Nachtblau (= Logo-Hintergrund) */
+  --bg-soft: #23233f;
+  --card: #262645;
+  --card-edge: #3a3a63;
+  --text: #f5efe1; /* Creme-Weiß */
+  --text-dim: #b4b0cf;
+  --text-faint: #827fa3;
 
-  --water: #2dd4bf; /* Teal: Wasser, Primärakzent */
-  --warm: #f5a05a; /* Bernstein/Koralle: Aufmerksamkeit/steigend */
-  --cool: #5ab0e0; /* gedämpftes Blau: fallend */
-  --neutral: #8aa0ab; /* stabil */
+  --water: #1fd0c2; /* Türkis: Wasser, Primärakzent */
+  --water-rgb: 31 208 194;
+  --warm: #ff7d5c; /* Koralle: Aufmerksamkeit/steigend */
+  --warm-rgb: 255 125 92;
+  --cool: #6ea8ff; /* Periwinkle-Blau: fallend */
+  --neutral: #9d99ba; /* stabil */
+  --cream: #fff4e0; /* Creme (Karo-Feld, Akzentlinien) */
 
   --rising: var(--warm);
   --falling: var(--cool);
@@ -23,7 +28,7 @@
 
   --radius: 18px;
   --gap: 14px;
-  --shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+  --shadow: 0 8px 26px rgba(8, 8, 20, 0.45);
 
   --font:
     system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -74,6 +79,37 @@ body {
 
 .app-header {
   margin-bottom: 22px;
+}
+
+/* Dezenter Karo-Trenner als Retro-Akzent (greift das Logo-Motiv auf). */
+.app-header::after {
+  content: "";
+  display: block;
+  height: 10px;
+  margin-top: 16px;
+  border-radius: 3px;
+  background: conic-gradient(
+      var(--water) 90deg,
+      var(--cream) 90deg 180deg,
+      var(--water) 180deg 270deg,
+      var(--cream) 270deg
+    )
+    0 0 / 10px 10px;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 10%,
+    #000 90%,
+    transparent
+  );
+  opacity: 0.85;
 }
 
 .app-brand {
@@ -127,9 +163,9 @@ body {
 }
 
 .badge--stale {
-  background: rgba(245, 160, 90, 0.16);
+  background: rgb(var(--warm-rgb) / 0.16);
   color: var(--warm);
-  border: 1px solid rgba(245, 160, 90, 0.4);
+  border: 1px solid rgb(var(--warm-rgb) / 0.45);
 }
 
 /* --- Raster --- */
@@ -158,11 +194,11 @@ body {
   background:
     radial-gradient(
       140% 120% at 100% 0%,
-      rgba(45, 212, 191, 0.14),
+      rgb(var(--water-rgb) / 0.16),
       transparent 60%
     ),
     linear-gradient(180deg, var(--card), var(--bg-soft));
-  border-color: rgba(45, 212, 191, 0.35);
+  border-color: rgb(var(--water-rgb) / 0.4);
 }
 
 .card__label {
@@ -279,8 +315,8 @@ body {
   border-radius: 999px;
   background: linear-gradient(
     90deg,
-    rgba(138, 160, 171, 0.25),
-    rgba(45, 212, 191, 0.25)
+    rgb(157 153 186 / 0.25),
+    rgb(var(--water-rgb) / 0.28)
   );
   overflow: visible;
 }
@@ -488,18 +524,22 @@ body {
 
 @media (prefers-color-scheme: light) {
   :root {
-    --bg: #f3f6f7;
-    --bg-soft: #ffffff;
-    --card: #ffffff;
-    --card-edge: #dde5e8;
-    --text: #16242b;
-    --text-dim: #4c5f68;
-    --text-faint: #7a8a92;
-    --water: #0c8f7e;
-    --warm: #c8631f;
-    --cool: #1f6f9e;
-    --neutral: #5b6f78;
-    --shadow: 0 6px 20px rgba(20, 40, 50, 0.1);
+    /* Cremefarbene Retro-Variante (90er: Creme + Türkis + Koralle). */
+    --bg: #fbf3e2;
+    --bg-soft: #fffaf0;
+    --card: #fffaf0;
+    --card-edge: #ecdfc6;
+    --text: #23233f;
+    --text-dim: #5b5872;
+    --text-faint: #8a86a0;
+    --water: #0f9d92;
+    --water-rgb: 15 157 146;
+    --warm: #e25a36;
+    --warm-rgb: 226 90 54;
+    --cool: #2f6fb0;
+    --neutral: #6f6c86;
+    --cream: #23233f;
+    --shadow: 0 8px 22px rgba(60, 40, 20, 0.12);
   }
   html {
     color-scheme: light;

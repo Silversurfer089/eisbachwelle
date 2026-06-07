@@ -23,8 +23,8 @@ export default defineConfig({
         description:
           "Live-Zustand der Eisbachwelle: Abfluss, Pegel, Wasser- und Lufttemperatur.",
         lang: "de",
-        theme_color: "#0e1418",
-        background_color: "#0e1418",
+        theme_color: "#1a1a2e",
+        background_color: "#1a1a2e",
         display: "standalone",
         start_url: ".",
         scope: ".",
