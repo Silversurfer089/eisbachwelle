@@ -1,6 +1,7 @@
 import { METRIC_KEYS } from "./model";
 import type {
   CurrentData,
+  ForecastDay,
   HistoryData,
   MetricKey,
   Reading,
@@ -61,7 +62,34 @@ export function validateCurrent(raw: unknown): CurrentData {
     out[key] = parseReading(meas[key], key);
   }
 
-  return { fetchedAt, sources: src, measurements: out };
+  return {
+    fetchedAt,
+    sources: src,
+    measurements: out,
+    forecast: parseForecast((raw as { forecast?: unknown }).forecast),
+  };
+}
+
+function num(x: unknown): number | null {
+  return typeof x === "number" && Number.isFinite(x) ? x : null;
+}
+
+/** Validiert die Vorhersage tolerant: ungültige Tage werden verworfen, nie geworfen. */
+function parseForecast(raw: unknown): ForecastDay[] {
+  if (!Array.isArray(raw)) return [];
+  const days: ForecastDay[] = [];
+  for (const d of raw) {
+    if (!isObject(d) || typeof d.date !== "string") continue;
+    days.push({
+      date: d.date,
+      tMax: num(d.tMax),
+      tMin: num(d.tMin),
+      precip: num(d.precip),
+      precipProb: num(d.precipProb),
+      code: num(d.code),
+    });
+  }
+  return days;
 }
 
 /** Jüngster Messzeitstempel über alle Messgrößen, oder null wenn keine vorhanden. */

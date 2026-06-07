@@ -111,6 +111,26 @@ export const de = {
       `Ø ${avg}  ·  min ${min}  ·  max ${max}`,
   },
 
+  forecast: {
+    title: "Vorhersage",
+    sourceNote: "Lufttemperatur & Niederschlag · Open-Meteo",
+    waterNote:
+      "Für Wassertemperatur, Abfluss und Pegel gibt es keine seriöse Tagesvorhersage – der Abfluss ist reguliert und kurzfristig sehr stabil.",
+    today: "Heute",
+    tomorrow: "Morgen",
+    tempRange: (max: string, min: string) => `${max}° / ${min}°`,
+    precip: (mm: string, prob: string) => `${mm} mm · ${prob} %`,
+    weather: {
+      clear: "Klar",
+      cloudy: "Bewölkt",
+      fog: "Nebel",
+      rain: "Regen",
+      snow: "Schnee",
+      storm: "Gewitter",
+      unknown: "—",
+    },
+  },
+
   sourcesLabel: "Datenquellen",
   attribution:
     "Pegel/Abfluss: Hochwassernachrichtendienst Bayern (HND) & Gewässerkundlicher Dienst Bayern (GKD). Wetter: Open-Meteo.",

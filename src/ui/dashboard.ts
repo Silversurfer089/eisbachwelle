@@ -1,9 +1,15 @@
 import { de } from "../i18n/de";
 import { wetsuitClass } from "../data/domain/neoprene";
+import { weatherKey } from "../data/domain/weather";
+import type { ForecastDay } from "../data/model";
 import { formatAbsolute, formatRelative, formatValue } from "./format";
 import { el, svgIcon } from "./dom";
-import { trendIcon } from "./icons";
+import { trendIcon, weatherIcon } from "./icons";
 import type { DashboardVM, MetricVM } from "./present";
+
+const tempFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
+const mmFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
+const weekdayFmt = new Intl.DateTimeFormat("de-DE", { weekday: "short" });
 
 // Reine Render-Schicht: baut aus dem View-Model DOM-Knoten. Keine Datenbeschaffung,
 // keine Trend-/Stale-Berechnung (passiert im Presenter / in der Domäne).
@@ -169,6 +175,66 @@ function statusLine(vm: DashboardVM, now: Date): HTMLElement {
   return el("div", { class: "status" }, children);
 }
 
+function dayLabel(dateStr: string, now: Date): string {
+  const d = new Date(`${dateStr}T12:00:00`);
+  if (Number.isNaN(d.getTime())) return dateStr;
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diff = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+  if (diff === 0) return de.forecast.today;
+  if (diff === 1) return de.forecast.tomorrow;
+  return weekdayFmt.format(d);
+}
+
+function forecastDay(d: ForecastDay, now: Date): HTMLElement {
+  const key = weatherKey(d.code);
+  const temp =
+    d.tMax !== null && d.tMin !== null
+      ? de.forecast.tempRange(tempFmt.format(d.tMax), tempFmt.format(d.tMin))
+      : de.status.noValue;
+  const children: HTMLElement[] = [
+    el("p", { class: "fc-day__name" }, [dayLabel(d.date, now)]),
+    svgIcon(weatherIcon(key), de.forecast.weather[key]),
+    el("p", { class: "fc-day__temp" }, [temp]),
+  ];
+  if (d.precip !== null && d.precipProb !== null) {
+    children.push(
+      el("p", { class: "fc-day__precip" }, [
+        de.forecast.precip(
+          mmFmt.format(d.precip),
+          tempFmt.format(d.precipProb),
+        ),
+      ]),
+    );
+  }
+  return el(
+    "article",
+    {
+      class: "fc-day",
+      "aria-label": `${dayLabel(d.date, now)}: ${de.forecast.weather[key]}, ${temp}`,
+    },
+    children,
+  );
+}
+
+/** Vorhersage (Luft + Niederschlag). Null, wenn keine Vorhersage vorliegt. */
+export function renderForecast(
+  vm: DashboardVM,
+  now: Date = new Date(),
+): HTMLElement | null {
+  if (vm.forecast.length === 0) return null;
+  return el("section", { class: "forecast", "aria-label": de.forecast.title }, [
+    el("h2", { class: "forecast__title" }, [de.forecast.title]),
+    el(
+      "div",
+      { class: "forecast__grid" },
+      vm.forecast.map((d) => forecastDay(d, now)),
+    ),
+    el("p", { class: "forecast__source" }, [de.forecast.sourceNote]),
+    el("p", { class: "forecast__waternote" }, [de.forecast.waterNote]),
+  ]);
+}
+
 /** Live-Teil (Kopf + Karten). Wird bei jeder Aktualisierung neu gerendert. */
 export function renderDashboard(
   vm: DashboardVM,
@@ -199,7 +265,11 @@ export function renderDashboard(
     vm.metrics.map((m) => metricCard(m, now)),
   );
 
-  return el("div", { class: "dashboard" }, [header, grid]);
+  const children: HTMLElement[] = [header, grid];
+  const forecast = renderForecast(vm, now);
+  if (forecast) children.push(forecast);
+
+  return el("div", { class: "dashboard" }, children);
 }
 
 function extLink(href: string, text: string): HTMLElement {

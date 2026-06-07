@@ -34,6 +34,23 @@ export interface Reading {
 }
 
 /**
+ * Tagesvorhersage (nur für seriös vorhersagbare Größen: Luft + Niederschlag).
+ * Quelle: Open-Meteo. Bewusst KEINE Wasser-/Abfluss-Vorhersage (reguliert/träge).
+ */
+export interface ForecastDay {
+  /** Lokales Datum "YYYY-MM-DD" (Europe/Berlin). */
+  date: string;
+  /** Höchst-/Tiefstwert Lufttemperatur in °C. */
+  tMax: number | null;
+  tMin: number | null;
+  /** Niederschlagsmenge in mm und Höchstwahrscheinlichkeit in %. */
+  precip: number | null;
+  precipProb: number | null;
+  /** WMO-Wettercode (für Symbol/Beschriftung). */
+  code: number | null;
+}
+
+/**
  * Aktueller Stand (Inhalt von public/data/current.json).
  * Jede Messgröße ist entweder ein Reading oder null (Quelle ausgefallen/kein Wert).
  */
@@ -44,6 +61,8 @@ export interface CurrentData {
   sources: Record<string, string>;
   /** Aktuelle Werte; Schlüssel immer vorhanden, Wert ggf. null. */
   measurements: Record<MetricKey, Reading | null>;
+  /** Tagesvorhersage (kann leer sein). */
+  forecast: ForecastDay[];
 }
 
 /** Ein Punkt einer Zeitreihe (kompakt gehalten). */

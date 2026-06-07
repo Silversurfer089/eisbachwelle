@@ -128,6 +128,17 @@ Historie:  https://api.open-meteo.com/v1/forecast?latitude=48.144&longitude=11.5
 - **Keine eigene Domain** (Nutzerwunsch). URL: `https://<user>.github.io/<repo>/`.
   Vite `base` wird im Deploy über `BASE_PATH` gesetzt.
 
+## Vorhersage
+
+- **Nur seriös vorhersagbare Größen: Lufttemperatur + Niederschlag** (echte 1–3-Tage-
+  Tagesvorhersage von Open-Meteo: Max/Min, mm, %, WMO-Code). Klar als „Open-Meteo" gekennzeichnet.
+- **Bewusst KEINE Wasser-/Abfluss-Vorhersage.** Für Fluss-Wassertemperatur gibt es keine
+  seriöse Quelle (hohe Trägheit), und der Eisbach-Abfluss ist **reguliert/gesteuert** und
+  kurzfristig sehr stabil (~0,8 m³/s Tagesgang in den Daten). Statt einer erfundenen Zahl steht
+  ein ehrlicher Hinweis. Schützt die Glaubwürdigkeit und folgt „keine Messwerte erfinden".
+- Speicherung im `current.json` unter `forecast` (klein, vom Cron befüllt); Loader parst
+  tolerant (ungültige Tage/Felder → null/verworfen).
+
 ## UI, Charts & Einordnung
 
 - **Framework-freies DOM-Rendering** über einen winzigen `el()`-Helfer (kein `innerHTML` mit

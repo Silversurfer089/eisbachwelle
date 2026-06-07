@@ -7,6 +7,7 @@ import { freshestTimestamp, isStale } from "../data/loader";
 import { METRIC_KEYS } from "../data/model";
 import type {
   CurrentData,
+  ForecastDay,
   HistoryData,
   MetricKey,
   Reading,
@@ -32,6 +33,8 @@ export interface DashboardVM {
   flowTrend: Trend;
   /** Einordnung des aktuellen Abflusses in die bisherige Historie, oder null. */
   flowContext: DistributionContext | null;
+  /** Tagesvorhersage (Luft + Niederschlag), kann leer sein. */
+  forecast: ForecastDay[];
 }
 
 export function present(
@@ -58,5 +61,6 @@ export function present(
     sources: current.sources,
     flowTrend: metrics.find((m) => m.key === "flow")?.trend ?? "unknown",
     flowContext,
+    forecast: current.forecast,
   };
 }

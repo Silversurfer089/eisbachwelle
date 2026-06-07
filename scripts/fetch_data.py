@@ -203,6 +203,41 @@ def _iso_minutes_to_utc(t: str) -> str:
     return to_iso_utc(dt)
 
 
+def fetch_forecast() -> list[dict]:
+    """Tagesvorhersage (Open-Meteo) für Luft + Niederschlag, 3 Tage, lokale Tagesgrenzen.
+
+    Bewusst nur seriös vorhersagbare Größen – keine Wasser-/Abfluss-Prognose.
+    """
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
+        "&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,"
+        "precipitation_probability_max,weathercode"
+        "&forecast_days=3&timezone=Europe%2FBerlin"
+    )
+    daily = json.loads(http_get(url)).get("daily", {})
+    times = daily.get("time", [])
+
+    def col(key: str, i: int):
+        arr = daily.get(key, [])
+        v = arr[i] if i < len(arr) else None
+        return v if isinstance(v, (int, float)) else None
+
+    out: list[dict] = []
+    for i, d in enumerate(times):
+        if isinstance(d, str):
+            out.append(
+                {
+                    "date": d,
+                    "tMax": col("temperature_2m_max", i),
+                    "tMin": col("temperature_2m_min", i),
+                    "precip": col("precipitation_sum", i),
+                    "precipProb": col("precipitation_probability_max", i),
+                    "code": col("weathercode", i),
+                }
+            )
+    return out
+
+
 def safe(label: str, fn):  # type: ignore[no-untyped-def]
     """Führt einen Fetch aus; bei Fehler wird geloggt und ein Default geliefert."""
     try:
@@ -308,6 +343,9 @@ def build() -> None:
         if hist:
             history["airTemp"] = merge_points(history["airTemp"], hist)
 
+    # --- Vorhersage (Luft + Niederschlag) ---
+    forecast = safe("Open-Meteo Vorhersage", fetch_forecast) or []
+
     # --- Ausdünnen & schreiben ---
     thinned = {m: thin(pts, now) for m, pts in history.items()}
 
@@ -332,6 +370,7 @@ def build() -> None:
                 "fetchedAt": to_iso_utc(now),
                 "sources": SOURCES,
                 "measurements": current,
+                "forecast": forecast,
             },
         )
 
