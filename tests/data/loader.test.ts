@@ -86,8 +86,13 @@ describe("isStale", () => {
   });
 
   it("ist veraltet jenseits der Toleranz", () => {
-    const now = new Date("2026-06-03T15:00:00Z"); // 2 h nach jüngstem Wert
+    const now = new Date("2026-06-03T16:30:00Z"); // 3,5 h nach jüngstem Wert
     expect(isStale(c, now)).toBe(true);
+  });
+
+  it("ist frisch knapp unter der 2-h-Schwelle", () => {
+    const now = new Date("2026-06-03T14:45:00Z"); // 1 h 45 nach jüngstem Wert
+    expect(isStale(c, now)).toBe(false);
   });
 
   it("ist veraltet, wenn keine Messgrößen vorhanden sind", () => {

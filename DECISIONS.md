@@ -128,6 +128,19 @@ Historie:  https://api.open-meteo.com/v1/forecast?latitude=48.144&longitude=11.5
 - **Keine eigene Domain** (Nutzerwunsch). URL: `https://<user>.github.io/<repo>/`.
   Vite `base` wird im Deploy über `BASE_PATH` gesetzt.
 
+## Cron-Takt (Realität) & Stale-Schwelle
+
+- **GitHub drosselt geplante Workflows** (`on: schedule`) im Free-Tier stark: trotz
+  `*/15`-Cron laufen die Jobs real nur etwa **alle 75–90 Min** (beobachtet, alle „success").
+  Das ist GitHub-seitig und nicht erzwingbar; `*/15` bleibt als „so oft wie möglich".
+- Folge: Die **Stale-Schwelle** wurde von 45 Min auf **2 h** angehoben, damit das
+  „Daten veraltet"-Badge nicht fälschlich erscheint, obwohl die Daten so frisch sind, wie
+  das System sie liefern kann. Die App zeigt weiterhin den echten „Stand: vor …".
+- Lehre fürs Debugging: „eingefrorene" Live-Daten waren kein Absturz, sondern der lange
+  Abstand zwischen geplanten Läufen + neuer Code, der erst im nächsten Lauf griff.
+  `safe()` fängt dennoch nun jede Exception ab (Robustheit), damit ein einzelner
+  Quellfehler nie den ganzen Lauf kippt.
+
 ## Vorhersage
 
 - **Nur seriös vorhersagbare Größen: Lufttemperatur + Niederschlag** (echte 1–3-Tage-

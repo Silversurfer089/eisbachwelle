@@ -9,8 +9,14 @@ import type {
   SeriesPoint,
 } from "./model";
 
-/** Daten gelten als veraltet, wenn der jüngste Wert älter als dies ist. Standard: 45 Min. */
-export const DEFAULT_STALE_MS = 45 * 60 * 1000;
+/**
+ * Daten gelten als veraltet, wenn der jüngste Wert älter als dies ist. Standard: 2 h.
+ *
+ * Grund für 2 h (nicht enger): GitHub führt den geplanten Cron im Free-Tier nur etwa alle
+ * 75–90 Min aus (Drosselung geplanter Workflows). Eine engere Schwelle würde „veraltet"
+ * anzeigen, obwohl die Daten so frisch sind, wie das System sie liefern kann.
+ */
+export const DEFAULT_STALE_MS = 2 * 60 * 60 * 1000;
 
 function isObject(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null && !Array.isArray(x);

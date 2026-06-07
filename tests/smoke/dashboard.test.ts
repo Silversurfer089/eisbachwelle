@@ -63,7 +63,7 @@ describe("Dashboard-Smoke-Test", () => {
   });
 
   it("zeigt ein Stale-Badge bei veralteten Daten", () => {
-    const late = new Date("2026-06-03T15:00:00Z");
+    const late = new Date("2026-06-03T16:30:00Z");
     const root = renderDashboard(present(current, history, late), late);
     expect(root.querySelector(".badge--stale")).not.toBeNull();
   });
