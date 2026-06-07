@@ -28,7 +28,6 @@ from __future__ import annotations
 import json
 import re
 import sys
-import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
@@ -275,10 +274,15 @@ def fetch_forecast_hourly() -> list[dict]:
 
 
 def safe(label: str, fn):  # type: ignore[no-untyped-def]
-    """Führt einen Fetch aus; bei Fehler wird geloggt und ein Default geliefert."""
+    """Führt einen Fetch aus; bei JEDEM Fehler wird geloggt und ein Default geliefert.
+
+    Bewusst breit (Exception): Kein einzelner Quellfehler – egal welcher Typ (Netzwerk-,
+    SSL-, Parsing-, Verbindungsabbruch …) – darf den gesamten Cron-Lauf abbrechen. Sonst
+    würde der Job fehlschlagen, nichts gepusht und die Live-Daten einfrieren.
+    """
     try:
         return fn()
-    except (urllib.error.URLError, ValueError, KeyError, TimeoutError) as exc:
+    except Exception as exc:  # noqa: BLE001 - Robustheit hat hier Vorrang
         log(f"FEHLER bei {label}: {exc!r}")
         return None
 
