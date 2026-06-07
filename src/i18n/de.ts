@@ -108,6 +108,7 @@ export const de = {
   forecast: {
     title: "Vorhersage",
     hourlyLabel: "Stündlicher Verlauf",
+    curveLabel: "Temperatur-Verlauf",
     now: "Jetzt",
     sourceNote: "Lufttemperatur & Niederschlag · Open-Meteo",
     waterNote:

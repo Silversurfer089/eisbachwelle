@@ -296,6 +296,45 @@ body {
   gap: var(--gap);
 }
 
+/* Glatte Temperatur-Kurve (leichtes Inline-SVG). */
+.tempcurve-wrap {
+  margin: 2px 0 14px;
+}
+
+.tempcurve {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.tc__line {
+  fill: none;
+  stroke: var(--water);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tc__area {
+  stroke: none;
+  fill: rgb(var(--water-rgb) / 0.12);
+}
+
+.tc__dot {
+  fill: var(--water);
+}
+
+.tc__lbl {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tc__x {
+  fill: var(--text-faint);
+  font-size: 11px;
+}
+
 /* Scrollbarer Stundenverlauf (wie in einer Wetter-App). */
 .fc-hourly {
   display: flex;

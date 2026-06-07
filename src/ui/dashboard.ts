@@ -5,6 +5,7 @@ import type { ForecastDay, ForecastHour } from "../data/model";
 import { formatAbsolute, formatRelative, formatValue } from "./format";
 import { el, svgIcon } from "./dom";
 import { trendIcon, weatherIcon } from "./icons";
+import { renderTempCurve } from "./temp-curve";
 import type { DashboardVM, MetricVM } from "./present";
 
 const tempFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
@@ -269,6 +270,9 @@ export function renderForecast(
   const children: HTMLElement[] = [
     el("h2", { class: "forecast__title" }, [de.forecast.title]),
   ];
+
+  const curve = renderTempCurve(vm.forecastHourly, now);
+  if (curve) children.push(curve);
 
   const hourly = renderHourly(vm, now);
   if (hourly) children.push(hourly);
