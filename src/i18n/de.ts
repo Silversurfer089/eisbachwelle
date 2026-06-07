@@ -21,6 +21,11 @@ export const de = {
     unknown: "keine Trendangabe",
   } satisfies Record<Trend, string>,
 
+  yesterday: {
+    same: "≈ wie gestern",
+    delta: (signed: string) => `${signed} ggü. gestern`,
+  },
+
   neoprene: {
     prefix: "Neopren",
     boardshorts: "Boardshorts oder dünn",

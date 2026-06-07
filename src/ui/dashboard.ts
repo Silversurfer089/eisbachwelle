@@ -30,6 +30,18 @@ function neopreneHint(m: MetricVM): HTMLElement | null {
   ]);
 }
 
+function yesterdayLine(m: MetricVM): HTMLElement | null {
+  if (!m.reading || !m.yesterday) return null;
+  const absFmt = formatValue(Math.abs(m.yesterday.delta), m.key);
+  const text =
+    absFmt === formatValue(0, m.key)
+      ? de.yesterday.same
+      : de.yesterday.delta(
+          `${m.yesterday.delta > 0 ? "+" : "−"}${absFmt} ${m.reading.unit}`,
+        );
+  return el("p", { class: "card__yday" }, [text]);
+}
+
 function buildShareText(vm: DashboardVM): string {
   const r = (key: MetricVM["key"]) =>
     vm.metrics.find((m) => m.key === key)?.reading ?? null;
@@ -127,6 +139,9 @@ function metricCard(m: MetricVM, now: Date): HTMLElement {
   if (meta.hint) {
     children.push(el("p", { class: "card__hint" }, [meta.hint]));
   }
+
+  const yday = yesterdayLine(m);
+  if (yday) children.push(yday);
 
   const neo = neopreneHint(m);
   if (neo) children.push(neo);

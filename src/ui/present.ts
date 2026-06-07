@@ -3,6 +3,7 @@ import {
   describeContext,
   type DistributionContext,
 } from "../data/domain/context";
+import { deltaToYesterday, type YesterdayDelta } from "../data/domain/compare";
 import { freshestTimestamp, isStale } from "../data/loader";
 import { METRIC_KEYS } from "../data/model";
 import type {
@@ -22,6 +23,8 @@ export interface MetricVM {
   key: MetricKey;
   reading: Reading | null;
   trend: Trend;
+  /** Differenz zum Wert vor ~24 h (gleiche Uhrzeit), oder null. */
+  yesterday: YesterdayDelta | null;
 }
 
 export interface DashboardVM {
@@ -45,11 +48,21 @@ export function present(
   history: HistoryData,
   now: Date = new Date(),
 ): DashboardVM {
-  const metrics: MetricVM[] = METRIC_KEYS.map((key) => ({
-    key,
-    reading: current.measurements[key],
-    trend: computeTrend(history.series[key]),
-  }));
+  const metrics: MetricVM[] = METRIC_KEYS.map((key) => {
+    const reading = current.measurements[key];
+    return {
+      key,
+      reading,
+      trend: computeTrend(history.series[key]),
+      yesterday: reading
+        ? deltaToYesterday(
+            history.series[key],
+            reading.value,
+            Date.parse(reading.t),
+          )
+        : null,
+    };
+  });
 
   const flowReading = current.measurements.flow;
   const flowContext = flowReading

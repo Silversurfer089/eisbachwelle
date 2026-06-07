@@ -278,6 +278,13 @@ body {
   font-size: 0.78rem;
 }
 
+.card__yday {
+  margin: 0;
+  color: var(--text-faint);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- Vorhersage --- */
 
 .forecast {
