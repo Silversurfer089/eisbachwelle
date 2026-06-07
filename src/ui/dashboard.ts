@@ -325,11 +325,7 @@ export function renderDashboard(
     vm.metrics.map((m) => metricCard(m, now)),
   );
 
-  const children: HTMLElement[] = [header, grid];
-  const forecast = renderForecast(vm, now);
-  if (forecast) children.push(forecast);
-
-  return el("div", { class: "dashboard" }, children);
+  return el("div", { class: "dashboard" }, [header, grid]);
 }
 
 function extLink(href: string, text: string): HTMLElement {
@@ -345,10 +341,6 @@ export function renderAbout(): HTMLElement {
     el("summary", { class: "about__summary" }, [a.summary]),
     el("div", { class: "about__body" }, [
       el("p", {}, [a.what]),
-
-      el("h3", { class: "about__h" }, [a.crowdTitle]),
-      el("p", {}, [a.crowdText]),
-      el("p", {}, [extLink(a.crowdUrl, `${a.crowdLink} ↗`)]),
 
       el("h3", { class: "about__h" }, [a.sourcesTitle]),
       el("ul", { class: "about__list" }, [

@@ -48,12 +48,6 @@ export const de = {
     methodTitle: "Zur Einordnung",
     method:
       "Die Perzentil-Einordnung leitet sich rein aus den bisher gesammelten Messwerten ab und ist nur eine Orientierung – kein Qualitäts-, Eignungs- oder Sicherheitsurteil.",
-    crowdTitle: "Andrang am Spot",
-    crowdText:
-      "Wie voll es gerade ist und die üblichen Stoßzeiten zeigt Google Maps:",
-    crowdLink: "Andrang in Google Maps ansehen",
-    crowdUrl:
-      "https://www.google.com/maps/search/?api=1&query=Eisbachwelle%2C+M%C3%BCnchen",
     sourceCode: "Quellcode (GitHub)",
     repoUrl: "https://github.com/Silversurfer089/eisbachwellle",
   },

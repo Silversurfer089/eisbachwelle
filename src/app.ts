@@ -1,7 +1,12 @@
 import { loadCurrent, loadHistory } from "./data/source";
 import type { HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
-import { renderDashboard, renderFooter, renderAbout } from "./ui/dashboard";
+import {
+  renderDashboard,
+  renderForecast,
+  renderFooter,
+  renderAbout,
+} from "./ui/dashboard";
 import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
 import { el } from "./ui/dom";
@@ -15,8 +20,10 @@ let lastHistory: HistoryData | null = null;
 let timer: number | undefined;
 
 // Persistente Shell-Teile (einmal gebaut, dann nur aktualisiert).
+// Reihenfolge: Dashboard → Einordnung → Vorhersage → Verlauf → Über → Fuß.
 let dashSlot: HTMLElement | null = null;
 let contextSlot: HTMLElement | null = null;
+let forecastSlot: HTMLElement | null = null;
 let historySection: HistorySection | null = null;
 
 function renderMessage(
@@ -48,20 +55,37 @@ function renderMessage(
 }
 
 function ensureShell(root: HTMLElement): void {
-  if (dashSlot && contextSlot && historySection && root.contains(dashSlot))
+  if (
+    dashSlot &&
+    contextSlot &&
+    forecastSlot &&
+    historySection &&
+    root.contains(dashSlot)
+  )
     return;
   dashSlot = el("div", { class: "dash-slot" });
   contextSlot = el("div", { class: "context-slot" });
+  forecastSlot = el("div", { class: "forecast-slot" });
   historySection = createHistorySection();
   root.replaceChildren(
     el("div", { class: "app-shell" }, [
       dashSlot,
       contextSlot,
+      forecastSlot,
       historySection.element,
       renderAbout(),
       renderFooter(),
     ]),
   );
+}
+
+/** Rendert die live aktualisierten Teile aus dem aktuellen View-Model. */
+function paint(history: HistoryData): void {
+  dashSlot!.replaceChildren(renderDashboard(lastVM!));
+  contextSlot!.replaceChildren(renderContextPanel(lastVM!));
+  const fc = renderForecast(lastVM!);
+  forecastSlot!.replaceChildren(...(fc ? [fc] : []));
+  historySection!.update(history);
 }
 
 async function refresh(root: HTMLElement): Promise<void> {
@@ -73,17 +97,13 @@ async function refresh(root: HTMLElement): Promise<void> {
     lastVM = present(current, history);
     lastHistory = history;
     ensureShell(root);
-    dashSlot!.replaceChildren(renderDashboard(lastVM));
-    contextSlot!.replaceChildren(renderContextPanel(lastVM));
-    historySection!.update(history);
+    paint(history);
   } catch (err) {
     console.warn("[eisbach] Aktualisierung fehlgeschlagen:", err);
     if (lastVM && lastHistory) {
       // Letzten guten Stand behalten; das Stale-Badge entsteht aus dem Alter.
       ensureShell(root);
-      dashSlot!.replaceChildren(renderDashboard(lastVM));
-      contextSlot!.replaceChildren(renderContextPanel(lastVM));
-      historySection!.update(lastHistory);
+      paint(lastHistory);
     } else {
       renderMessage(
         root,
