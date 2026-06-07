@@ -107,6 +107,8 @@ export const de = {
     empty: "Für diesen Zeitraum liegen noch nicht genug Daten vor.",
     chartLabel: (metric: string, range: string) =>
       `Verlaufsdiagramm ${metric}, Zeitraum ${range}`,
+    stats: (avg: string, min: string, max: string) =>
+      `Ø ${avg}  ·  min ${min}  ·  max ${max}`,
   },
 
   sourcesLabel: "Datenquellen",

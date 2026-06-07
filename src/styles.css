@@ -429,6 +429,38 @@ body {
   font-size: 0.9rem;
 }
 
+.chart-stats {
+  margin: 10px 2px 0;
+  color: var(--text-dim);
+  font-size: 0.88rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Kleine Karo-Marker vor den Abschnittstiteln (Retro-Akzent, greift das Logo auf). */
+.context__title,
+.history__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.context__title::before,
+.history__title::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background: conic-gradient(
+      var(--water) 90deg,
+      var(--cream) 90deg 180deg,
+      var(--water) 180deg 270deg,
+      var(--cream) 270deg
+    )
+    0 0 / 8px 8px;
+}
+
 /* --- Teilen-Button --- */
 
 .share {

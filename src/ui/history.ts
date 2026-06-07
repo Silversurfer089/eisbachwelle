@@ -96,6 +96,7 @@ export function createHistorySection(): HistorySection {
     de.history.empty,
   ]);
   const chartWrap = el("div", { class: "chart-wrap" }, [canvas, emptyMsg]);
+  const stats = el("p", { class: "chart-stats", hidden: "" });
 
   const element = el(
     "section",
@@ -105,6 +106,7 @@ export function createHistorySection(): HistorySection {
       metricTabs,
       rangeTabs,
       chartWrap,
+      stats,
     ],
   );
 
@@ -126,6 +128,20 @@ export function createHistorySection(): HistorySection {
     const hasData = points.length >= 2;
     canvas.hidden = !hasData;
     emptyMsg.hidden = hasData;
+
+    // Statistik-Zeile (Ø · min · max) für die aktuelle Auswahl.
+    stats.hidden = !hasData;
+    if (hasData) {
+      const ys = points.map((p) => p.y);
+      const unit = METRIC_UNIT[selMetric];
+      const mean = ys.reduce((a, b) => a + b, 0) / ys.length;
+      const fmt = (v: number) => `${formatValue(v, selMetric)} ${unit}`;
+      stats.textContent = de.history.stats(
+        fmt(mean),
+        fmt(Math.min(...ys)),
+        fmt(Math.max(...ys)),
+      );
+    }
 
     canvas.setAttribute(
       "aria-label",
