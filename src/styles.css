@@ -429,6 +429,105 @@ body {
   font-size: 0.9rem;
 }
 
+/* --- Teilen-Button --- */
+
+.share {
+  margin-left: auto;
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 999px;
+  padding: 7px 12px;
+  cursor: pointer;
+}
+
+.share:hover {
+  color: var(--text);
+}
+
+.share:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: 2px;
+}
+
+/* Neopren-Hinweis (Akzent in Wasserfarbe). */
+.card__hint--neo {
+  color: var(--water);
+  font-weight: 600;
+}
+
+/* --- Über-Bereich --- */
+
+.about {
+  margin-top: 26px;
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+
+.about__summary {
+  cursor: pointer;
+  padding: 14px 18px;
+  font-weight: 700;
+  list-style: none;
+}
+
+.about__summary::-webkit-details-marker {
+  display: none;
+}
+
+.about__summary::after {
+  content: "+";
+  float: right;
+  color: var(--text-dim);
+}
+
+.about[open] .about__summary::after {
+  content: "–";
+}
+
+.about__summary:focus-visible {
+  outline: 3px solid var(--water);
+  outline-offset: -3px;
+  border-radius: var(--radius);
+}
+
+.about__body {
+  padding: 0 18px 16px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.about__body p {
+  margin: 8px 0;
+}
+
+.about__h {
+  margin: 14px 0 4px;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.about__list {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.about__list li {
+  margin: 4px 0;
+}
+
+.about a {
+  color: var(--water);
+}
+
 /* --- Fuß --- */
 
 .app-footer {

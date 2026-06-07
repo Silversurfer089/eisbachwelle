@@ -1,7 +1,7 @@
 import { loadCurrent, loadHistory } from "./data/source";
 import type { HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
-import { renderDashboard, renderFooter } from "./ui/dashboard";
+import { renderDashboard, renderFooter, renderAbout } from "./ui/dashboard";
 import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
 import { el } from "./ui/dom";
@@ -58,6 +58,7 @@ function ensureShell(root: HTMLElement): void {
       dashSlot,
       contextSlot,
       historySection.element,
+      renderAbout(),
       renderFooter(),
     ]),
   );

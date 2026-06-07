@@ -1,4 +1,5 @@
 import { de } from "../i18n/de";
+import { wetsuitClass } from "../data/domain/neoprene";
 import { formatAbsolute, formatRelative, formatValue } from "./format";
 import { el, svgIcon } from "./dom";
 import { trendIcon } from "./icons";
@@ -6,6 +7,64 @@ import type { DashboardVM, MetricVM } from "./present";
 
 // Reine Render-Schicht: baut aus dem View-Model DOM-Knoten. Keine Datenbeschaffung,
 // keine Trend-/Stale-Berechnung (passiert im Presenter / in der Domäne).
+
+const SHARE_ICON = `<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7"/><path d="M12 3v13"/><path d="m7 8 5-5 5 5"/></svg>`;
+
+function neopreneHint(m: MetricVM): HTMLElement | null {
+  if (m.key !== "waterTemp" || !m.reading) return null;
+  const cls = wetsuitClass(m.reading.value);
+  if (!cls) return null;
+  return el("p", { class: "card__hint card__hint--neo" }, [
+    `${de.neoprene.prefix}: ${de.neoprene[cls]}`,
+  ]);
+}
+
+function buildShareText(vm: DashboardVM): string {
+  const r = (key: MetricVM["key"]) =>
+    vm.metrics.find((m) => m.key === key)?.reading ?? null;
+  const fmt = (key: MetricVM["key"]) => {
+    const reading = r(key);
+    return reading
+      ? `${formatValue(reading.value, key)} ${reading.unit}`
+      : de.status.noValue;
+  };
+  return de.share.line(fmt("flow"), fmt("level"), fmt("waterTemp"));
+}
+
+function shareButton(vm: DashboardVM): HTMLElement {
+  const btn = el(
+    "button",
+    { class: "share", type: "button", "aria-label": de.share.action },
+    [
+      svgIcon(SHARE_ICON),
+      el("span", { class: "share__label" }, [de.share.action]),
+    ],
+  );
+  btn.addEventListener("click", () => {
+    const text = buildShareText(vm);
+    const url = location.href;
+    const nav = navigator as Navigator & {
+      share?: (d: {
+        title: string;
+        text: string;
+        url: string;
+      }) => Promise<void>;
+    };
+    if (typeof nav.share === "function") {
+      void nav.share({ title: de.share.title, text, url }).catch(() => {});
+    } else if (navigator.clipboard) {
+      void navigator.clipboard.writeText(`${text} ${url}`).then(() => {
+        const label = btn.querySelector(".share__label");
+        if (label) {
+          const prev = label.textContent;
+          label.textContent = de.share.copied;
+          window.setTimeout(() => (label.textContent = prev), 1600);
+        }
+      });
+    }
+  });
+  return btn;
+}
 
 function metricCard(m: MetricVM, now: Date): HTMLElement {
   const meta = de.metric[m.key];
@@ -57,6 +116,9 @@ function metricCard(m: MetricVM, now: Date): HTMLElement {
   if (meta.hint) {
     children.push(el("p", { class: "card__hint" }, [meta.hint]));
   }
+
+  const neo = neopreneHint(m);
+  if (neo) children.push(neo);
 
   const ariaLabel = m.reading
     ? `${meta.label}: ${formatValue(m.reading.value, m.key)} ${m.reading.unit}, ${de.trend[m.trend]}, ${de.status.measuredAt} ${formatRelative(m.reading.t, now)}`
@@ -126,6 +188,7 @@ export function renderDashboard(
         el("h1", { class: "app-title" }, [de.appName]),
         el("p", { class: "app-location" }, [de.location]),
       ]),
+      shareButton(vm),
     ]),
     statusLine(vm, now),
   ]);
@@ -137,6 +200,44 @@ export function renderDashboard(
   );
 
   return el("div", { class: "dashboard" }, [header, grid]);
+}
+
+function extLink(href: string, text: string): HTMLElement {
+  return el("a", { href, target: "_blank", rel: "noopener noreferrer" }, [
+    text,
+  ]);
+}
+
+/** Aufklappbarer Über-/Quellen-Bereich inkl. Andrang-Link (Google Maps). */
+export function renderAbout(): HTMLElement {
+  const a = de.about;
+  return el("details", { class: "about" }, [
+    el("summary", { class: "about__summary" }, [a.summary]),
+    el("div", { class: "about__body" }, [
+      el("p", {}, [a.what]),
+
+      el("h3", { class: "about__h" }, [a.crowdTitle]),
+      el("p", {}, [a.crowdText]),
+      el("p", {}, [extLink(a.crowdUrl, `${a.crowdLink} ↗`)]),
+
+      el("h3", { class: "about__h" }, [a.sourcesTitle]),
+      el("ul", { class: "about__list" }, [
+        el("li", {}, [
+          extLink(
+            "https://www.hnd.bayern.de/pegel/isar/muenchen-himmelreichbruecke-16515005",
+            a.sourceHnd,
+          ),
+        ]),
+        el("li", {}, [extLink("https://www.gkd.bayern.de", a.sourceGkd)]),
+        el("li", {}, [extLink("https://open-meteo.com", a.sourceMeteo)]),
+      ]),
+
+      el("h3", { class: "about__h" }, [a.methodTitle]),
+      el("p", {}, [a.method]),
+
+      el("p", {}, [extLink(a.repoUrl, `${a.sourceCode} ↗`)]),
+    ]),
+  ]);
 }
 
 /** Statischer Fuß mit Quellen-Attribution und Disclaimer. */
