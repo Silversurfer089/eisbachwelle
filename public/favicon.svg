@@ -1,18 +1,17 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="Eisbachwelle">
+<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Eisbachwelle">
   <defs>
-    <!-- Schachbrett (Karo): Türkis-Grund mit Creme-Feldern -->
-    <pattern id="karo" width="24" height="24" patternUnits="userSpaceOnUse">
-      <rect width="24" height="24" fill="#2dd4bf" />
-      <rect width="12" height="12" fill="#eef1e6" />
-      <rect x="12" y="12" width="12" height="12" fill="#eef1e6" />
+    <pattern id="karo" width="128" height="128" patternUnits="userSpaceOnUse">
+      <rect width="128" height="128" fill="#FFF4E0"/>            <!-- Creme -->
+      <rect width="64" height="64" fill="#15C2B8"/>              <!-- Türkis -->
+      <rect x="64" y="64" width="64" height="64" fill="#15C2B8"/>
     </pattern>
-    <!-- Wellen-/Zeltform -->
-    <clipPath id="welle">
-      <path d="M12 86 C 30 78, 40 50, 50 40 Q60 31 70 40 C 80 50, 90 78, 108 86 Z" />
-    </clipPath>
   </defs>
-  <rect width="120" height="120" rx="24" fill="#0e1418" />
-  <g clip-path="url(#welle)">
-    <rect x="0" y="22" width="120" height="66" fill="url(#karo)" />
-  </g>
+
+  <!-- Hintergrund-Kachel (Nachtblau) -->
+  <rect width="512" height="512" rx="112" fill="#1A1A2E"/>
+
+  <!-- Welle mit Schachbrett-Füllung und cremefarbener Kontur -->
+  <path d="M92 366 L92 300 C176 300 220 268 270 206 C296 174 314 164 340 164
+           C388 164 416 212 420 300 L420 366 Z"
+        fill="url(#karo)" stroke="#FFF4E0" stroke-width="14" stroke-linejoin="round"/>
 </svg>
