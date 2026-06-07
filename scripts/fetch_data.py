@@ -238,6 +238,42 @@ def fetch_forecast() -> list[dict]:
     return out
 
 
+def fetch_forecast_hourly() -> list[dict]:
+    """Stündliche Vorhersage (Luft + Niederschlag) für die nächsten ~48 h."""
+    url = (
+        f"https://api.open-meteo.com/v1/forecast?latitude={LAT}&longitude={LON}"
+        "&hourly=temperature_2m,precipitation,precipitation_probability,weathercode"
+        "&forecast_days=3&timezone=UTC"
+    )
+    h = json.loads(http_get(url)).get("hourly", {})
+    times = h.get("time", [])
+
+    def col(key: str, i: int):
+        arr = h.get(key, [])
+        v = arr[i] if i < len(arr) else None
+        return v if isinstance(v, (int, float)) else None
+
+    now = datetime.now(timezone.utc)
+    lo, hi = now - timedelta(hours=1), now + timedelta(hours=48)
+    out: list[dict] = []
+    for i, t in enumerate(times):
+        if not isinstance(t, str):
+            continue
+        iso = _iso_minutes_to_utc(t)
+        dt = datetime.fromisoformat(iso.replace("Z", "+00:00"))
+        if lo <= dt <= hi:
+            out.append(
+                {
+                    "t": iso,
+                    "temp": col("temperature_2m", i),
+                    "precip": col("precipitation", i),
+                    "precipProb": col("precipitation_probability", i),
+                    "code": col("weathercode", i),
+                }
+            )
+    return out
+
+
 def safe(label: str, fn):  # type: ignore[no-untyped-def]
     """Führt einen Fetch aus; bei Fehler wird geloggt und ein Default geliefert."""
     try:
@@ -343,8 +379,9 @@ def build() -> None:
         if hist:
             history["airTemp"] = merge_points(history["airTemp"], hist)
 
-    # --- Vorhersage (Luft + Niederschlag) ---
+    # --- Vorhersage (Luft + Niederschlag): Tage + Stundenverlauf ---
     forecast = safe("Open-Meteo Vorhersage", fetch_forecast) or []
+    forecast_hourly = safe("Open-Meteo Stunden", fetch_forecast_hourly) or []
 
     # --- Ausdünnen & schreiben ---
     thinned = {m: thin(pts, now) for m, pts in history.items()}
@@ -371,6 +408,7 @@ def build() -> None:
                 "sources": SOURCES,
                 "measurements": current,
                 "forecast": forecast,
+                "forecastHourly": forecast_hourly,
             },
         )
 

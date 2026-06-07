@@ -50,6 +50,20 @@ export interface ForecastDay {
   code: number | null;
 }
 
+/** Eine Stunde der Vorhersage (Open-Meteo). */
+export interface ForecastHour {
+  /** ISO 8601 UTC. */
+  t: string;
+  /** Lufttemperatur in °C. */
+  temp: number | null;
+  /** Niederschlagsmenge in mm. */
+  precip: number | null;
+  /** Niederschlagswahrscheinlichkeit in %. */
+  precipProb: number | null;
+  /** WMO-Wettercode. */
+  code: number | null;
+}
+
 /**
  * Aktueller Stand (Inhalt von public/data/current.json).
  * Jede Messgröße ist entweder ein Reading oder null (Quelle ausgefallen/kein Wert).
@@ -63,6 +77,8 @@ export interface CurrentData {
   measurements: Record<MetricKey, Reading | null>;
   /** Tagesvorhersage (kann leer sein). */
   forecast: ForecastDay[];
+  /** Stündliche Vorhersage der nächsten ~48 h (kann leer sein). */
+  forecastHourly: ForecastHour[];
 }
 
 /** Ein Punkt einer Zeitreihe (kompakt gehalten). */

@@ -8,6 +8,7 @@ import { METRIC_KEYS } from "../data/model";
 import type {
   CurrentData,
   ForecastDay,
+  ForecastHour,
   HistoryData,
   MetricKey,
   Reading,
@@ -35,6 +36,8 @@ export interface DashboardVM {
   flowContext: DistributionContext | null;
   /** Tagesvorhersage (Luft + Niederschlag), kann leer sein. */
   forecast: ForecastDay[];
+  /** Stündliche Vorhersage (nächste ~48 h), kann leer sein. */
+  forecastHourly: ForecastHour[];
 }
 
 export function present(
@@ -62,5 +65,6 @@ export function present(
     flowTrend: metrics.find((m) => m.key === "flow")?.trend ?? "unknown",
     flowContext,
     forecast: current.forecast,
+    forecastHourly: current.forecastHourly,
   };
 }

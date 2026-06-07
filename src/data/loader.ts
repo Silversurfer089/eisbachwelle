@@ -2,6 +2,7 @@ import { METRIC_KEYS } from "./model";
 import type {
   CurrentData,
   ForecastDay,
+  ForecastHour,
   HistoryData,
   MetricKey,
   Reading,
@@ -67,6 +68,9 @@ export function validateCurrent(raw: unknown): CurrentData {
     sources: src,
     measurements: out,
     forecast: parseForecast((raw as { forecast?: unknown }).forecast),
+    forecastHourly: parseForecastHourly(
+      (raw as { forecastHourly?: unknown }).forecastHourly,
+    ),
   };
 }
 
@@ -90,6 +94,23 @@ function parseForecast(raw: unknown): ForecastDay[] {
     });
   }
   return days;
+}
+
+/** Validiert den Stundenverlauf tolerant (ungültige Stunden verworfen). */
+function parseForecastHourly(raw: unknown): ForecastHour[] {
+  if (!Array.isArray(raw)) return [];
+  const hours: ForecastHour[] = [];
+  for (const h of raw) {
+    if (!isObject(h) || !isValidIso(h.t)) continue;
+    hours.push({
+      t: h.t,
+      temp: num(h.temp),
+      precip: num(h.precip),
+      precipProb: num(h.precipProb),
+      code: num(h.code),
+    });
+  }
+  return hours;
 }
 
 /** Jüngster Messzeitstempel über alle Messgrößen, oder null wenn keine vorhanden. */

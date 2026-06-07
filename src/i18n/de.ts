@@ -113,6 +113,8 @@ export const de = {
 
   forecast: {
     title: "Vorhersage",
+    hourlyLabel: "Stündlicher Verlauf",
+    now: "Jetzt",
     sourceNote: "Lufttemperatur & Niederschlag · Open-Meteo",
     waterNote:
       "Für Wassertemperatur, Abfluss und Pegel gibt es keine seriöse Tagesvorhersage – der Abfluss ist reguliert und kurzfristig sehr stabil.",

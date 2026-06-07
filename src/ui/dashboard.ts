@@ -1,7 +1,7 @@
 import { de } from "../i18n/de";
 import { wetsuitClass } from "../data/domain/neoprene";
 import { weatherKey } from "../data/domain/weather";
-import type { ForecastDay } from "../data/model";
+import type { ForecastDay, ForecastHour } from "../data/model";
 import { formatAbsolute, formatRelative, formatValue } from "./format";
 import { el, svgIcon } from "./dom";
 import { trendIcon, weatherIcon } from "./icons";
@@ -10,6 +10,10 @@ import type { DashboardVM, MetricVM } from "./present";
 const tempFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
 const mmFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
 const weekdayFmt = new Intl.DateTimeFormat("de-DE", { weekday: "short" });
+const hourFmt = new Intl.DateTimeFormat("de-DE", {
+  hour: "2-digit",
+  timeZone: "Europe/Berlin",
+});
 
 // Reine Render-Schicht: baut aus dem View-Model DOM-Knoten. Keine Datenbeschaffung,
 // keine Trend-/Stale-Berechnung (passiert im Presenter / in der Domäne).
@@ -217,22 +221,78 @@ function forecastDay(d: ForecastDay, now: Date): HTMLElement {
   );
 }
 
-/** Vorhersage (Luft + Niederschlag). Null, wenn keine Vorhersage vorliegt. */
+function hourCell(h: ForecastHour, isFirst: boolean): HTMLElement {
+  const key = weatherKey(h.code);
+  const time = isFirst ? de.forecast.now : hourFmt.format(new Date(h.t));
+  const children: HTMLElement[] = [
+    el("p", { class: "fc-hour__time" }, [time]),
+    svgIcon(weatherIcon(key), de.forecast.weather[key]),
+    el("p", { class: "fc-hour__temp" }, [
+      h.temp !== null ? `${tempFmt.format(h.temp)}°` : de.status.noValue,
+    ]),
+  ];
+  const rain =
+    h.precipProb !== null && h.precipProb > 0
+      ? `${tempFmt.format(h.precipProb)} %`
+      : " ";
+  children.push(el("p", { class: "fc-hour__precip" }, [rain]));
+  return el("div", { class: "fc-hour" }, children);
+}
+
+function renderHourly(vm: DashboardVM, now: Date): HTMLElement | null {
+  const nowMs = now.getTime();
+  const hours = vm.forecastHourly
+    .filter((h) => {
+      const t = Date.parse(h.t);
+      return Number.isFinite(t) && t >= nowMs - 3_600_000;
+    })
+    .slice(0, 24);
+  if (hours.length === 0) return null;
+  return el(
+    "div",
+    {
+      class: "fc-hourly",
+      role: "group",
+      "aria-label": de.forecast.hourlyLabel,
+    },
+    hours.map((h, i) => hourCell(h, i === 0)),
+  );
+}
+
+/** Vorhersage (Luft + Niederschlag): Stundenverlauf + Tageskarten. */
 export function renderForecast(
   vm: DashboardVM,
   now: Date = new Date(),
 ): HTMLElement | null {
-  if (vm.forecast.length === 0) return null;
-  return el("section", { class: "forecast", "aria-label": de.forecast.title }, [
+  if (vm.forecast.length === 0 && vm.forecastHourly.length === 0) return null;
+
+  const children: HTMLElement[] = [
     el("h2", { class: "forecast__title" }, [de.forecast.title]),
-    el(
-      "div",
-      { class: "forecast__grid" },
-      vm.forecast.map((d) => forecastDay(d, now)),
-    ),
+  ];
+
+  const hourly = renderHourly(vm, now);
+  if (hourly) children.push(hourly);
+
+  if (vm.forecast.length > 0) {
+    children.push(
+      el(
+        "div",
+        { class: "forecast__grid" },
+        vm.forecast.map((d) => forecastDay(d, now)),
+      ),
+    );
+  }
+
+  children.push(
     el("p", { class: "forecast__source" }, [de.forecast.sourceNote]),
     el("p", { class: "forecast__waternote" }, [de.forecast.waterNote]),
-  ]);
+  );
+
+  return el(
+    "section",
+    { class: "forecast", "aria-label": de.forecast.title },
+    children,
+  );
 }
 
 /** Live-Teil (Kopf + Karten). Wird bei jeder Aktualisierung neu gerendert. */
