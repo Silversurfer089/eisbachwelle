@@ -419,7 +419,9 @@ export function renderAbout(): HTMLElement {
       el("h3", { class: "about__h" }, [a.methodTitle]),
       el("p", {}, [a.method]),
 
-      el("p", {}, [extLink(a.repoUrl, `${a.sourceCode} ↗`)]),
+      el("p", {}, [
+        extLink(import.meta.env.VITE_REPO_URL ?? a.repoUrl, `${a.sourceCode} ↗`),
+      ]),
     ]),
   ]);
 }

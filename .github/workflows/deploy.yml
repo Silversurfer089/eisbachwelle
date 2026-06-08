@@ -35,6 +35,8 @@ jobs:
           BASE_PATH: "/${{ github.event.repository.name }}/"
           # Produktion liest die Live-Daten aus dem data-Branch (kein Rebuild bei Updates).
           VITE_DATA_BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/data/"
+          # Quellcode-Link leitet sich aus dem Repo ab → übersteht Umbenennen ohne Code-Änderung.
+          VITE_REPO_URL: "https://github.com/${{ github.repository }}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist
