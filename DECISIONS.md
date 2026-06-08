@@ -141,6 +141,19 @@ Historie:  https://api.open-meteo.com/v1/forecast?latitude=48.144&longitude=11.5
   `safe()` fängt dennoch nun jede Exception ab (Robustheit), damit ein einzelner
   Quellfehler nie den ganzen Lauf kippt.
 
+## Wassertemperatur: Tendenz heute, Modell später
+
+- **Heute (ehrlich):** Nur eine grobe **Tendenz** (steigt/fällt/kaum) aus der Luft-Vorhersage
+  - thermischer Trägheit, in der UI klar als „Schätzung" gekennzeichnet – keine °C-Zahl.
+- **Vorbereitung Modell:** Der Cron loggt zusätzlich **flussaufwärts** die Isar-
+  Wassertemperatur von **Puppling** und **Bad Tölz** (GKD `/messwerte/tabelle`) still in
+  `history.json` (Schlüssel `upstreamPuppling`, `upstreamToelz`). Der App-Loader liest nur die
+  vier Hauptgrößen → unbekannte Reihen werden ignoriert, keine UI-Wirkung.
+- **Physik/Begründung:** Bergwasser kommt zeitversetzt an und erwärmt sich unterwegs (beobachtet
+  am 2026-06-08: Bad Tölz 11,8 °C → Puppling 15,4 °C → Eisbach 16,5 °C). Laufzeit Puppling→München
+  ~5–6 h, Bad Tölz ~9 h. Erst nach Wochen Datensammlung lässt sich ein Modell (Upstream +
+  Luft → Eisbach-Wassertemperatur) **validieren**; nur dann wird es als echte Vorhersage gezeigt.
+
 ## Vorhersage
 
 - **Nur seriös vorhersagbare Größen: Lufttemperatur + Niederschlag** (echte 1–3-Tage-

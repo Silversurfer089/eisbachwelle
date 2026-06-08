@@ -62,6 +62,16 @@ SOURCES = {
 GKD_THEMA = {"level": "wasserstand", "flow": "abfluss", "waterTemp": "wassertemperatur"}
 HND_METHODE = {"level": "wasserstand", "flow": "abfluss"}
 
+# Flussaufwärts-Wassertemperatur (Isar) – wird STILL mitgeloggt, noch nicht angezeigt.
+# Zweck: Datenbasis für ein später validiertes Wassertemperatur-Vorhersagemodell
+# (Advektion: Bergwasser kommt zeitversetzt in München an). Schlüssel = Pfad nach
+# /de/fluesse/. Werte erscheinen in history.json unter diesen Schlüsseln; der App-Loader
+# ignoriert unbekannte Reihen, daher keine UI-Auswirkung.
+UPSTREAM = {
+    "upstreamPuppling": "wassertemperatur/isar/puppling-16004403",
+    "upstreamToelz": "wassertemperatur/isar/bad-toelz-b472-16003207",
+}
+
 # Ausdünnung der Historie: (max. Alter, minimaler Abstand zwischen Punkten)
 THINNING = [
     (timedelta(hours=24), timedelta(minutes=15)),
@@ -154,6 +164,12 @@ def fetch_gkd(metric: str) -> list[Point]:
         f"https://www.gkd.bayern.de/de/fluesse/{thema}/bayern/"
         f"muenchen-himmelreichbruecke-{PEGEL_ID}/messwerte/tabelle"
     )
+    return parse_html_table(http_get(url))
+
+
+def fetch_gkd_path(path: str) -> list[Point]:
+    """GKD /messwerte/tabelle für eine beliebige Messstelle (Pfad nach /de/fluesse/)."""
+    url = f"https://www.gkd.bayern.de/de/fluesse/{path}/messwerte/tabelle"
     return parse_html_table(http_get(url))
 
 
@@ -326,25 +342,26 @@ def thin(points: list[Point], now: datetime) -> list[Point]:
 # --------------------------------------------------------------------------- #
 
 
+ALL_SERIES = list(UNITS) + list(UPSTREAM)
+
+
 def load_existing_history() -> dict[str, list[Point]]:
+    out: dict[str, list[Point]] = {m: [] for m in ALL_SERIES}
     path = OUT_DIR / "history.json"
     if not path.exists():
-        return {m: [] for m in UNITS}
+        return out
     try:
-        data = json.loads(path.read_text(encoding="utf-8"))
-        series = data.get("series", {})
-        out: dict[str, list[Point]] = {}
-        for m in UNITS:
-            raw = series.get(m, [])
+        series = json.loads(path.read_text(encoding="utf-8")).get("series", {})
+        # Alle vorhandenen Reihen laden (inkl. Upstream-Schlüssel).
+        for m, raw in series.items():
             out[m] = [
                 Point(p["t"], float(p["v"]))
                 for p in raw
                 if isinstance(p, dict) and "t" in p and "v" in p
             ]
-        return out
     except (ValueError, KeyError, TypeError) as exc:
         log(f"WARNUNG: history.json unlesbar ({exc!r}), starte leer.")
-        return {m: [] for m in UNITS}
+    return out
 
 
 def build() -> None:
@@ -382,6 +399,12 @@ def build() -> None:
             }
         if hist:
             history["airTemp"] = merge_points(history["airTemp"], hist)
+
+    # --- Flussaufwärts-Wassertemperatur (still mitloggen für späteres Modell) ---
+    for key, path in UPSTREAM.items():
+        pts = safe(f"GKD {key}", lambda path=path: fetch_gkd_path(path)) or []
+        if pts:
+            history[key] = merge_points(history[key], pts)
 
     # --- Vorhersage (Luft + Niederschlag): Tage + Stundenverlauf ---
     forecast = safe("Open-Meteo Vorhersage", fetch_forecast) or []
