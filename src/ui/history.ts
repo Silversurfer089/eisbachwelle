@@ -1,7 +1,7 @@
 import type { LineChart, RangeMode } from "../charts/line-chart";
 import { METRIC_KEYS, METRIC_UNIT } from "../data/model";
 import type { HistoryData, MetricKey } from "../data/model";
-import { de } from "../i18n/de";
+import { t } from "../i18n";
 import { formatValue } from "./format";
 import { el } from "./dom";
 
@@ -47,7 +47,7 @@ export function createHistorySection(): HistorySection {
 
   const metricTabs = el(
     "div",
-    { class: "tabs", role: "group", "aria-label": de.history.metricGroupLabel },
+    { class: "tabs", role: "group", "aria-label": t.history.metricGroupLabel },
     METRIC_KEYS.map((key) => {
       const btn = el(
         "button",
@@ -56,7 +56,7 @@ export function createHistorySection(): HistorySection {
           type: "button",
           "aria-pressed": String(key === selMetric),
         },
-        [de.metric[key].label],
+        [t.metric[key].label],
       );
       btn.addEventListener("click", () => {
         selMetric = key;
@@ -70,7 +70,7 @@ export function createHistorySection(): HistorySection {
 
   const rangeTabs = el(
     "div",
-    { class: "tabs", role: "group", "aria-label": de.history.rangeGroupLabel },
+    { class: "tabs", role: "group", "aria-label": t.history.rangeGroupLabel },
     RANGE_ORDER.map((mode) => {
       const btn = el(
         "button",
@@ -79,7 +79,7 @@ export function createHistorySection(): HistorySection {
           type: "button",
           "aria-pressed": String(mode === selRange),
         },
-        [de.history.ranges[mode]],
+        [t.history.ranges[mode]],
       );
       btn.addEventListener("click", () => {
         selRange = mode;
@@ -93,16 +93,16 @@ export function createHistorySection(): HistorySection {
 
   const canvas = el("canvas", { class: "chart" });
   const emptyMsg = el("p", { class: "chart-empty", hidden: "" }, [
-    de.history.empty,
+    t.history.empty,
   ]);
   const chartWrap = el("div", { class: "chart-wrap" }, [canvas, emptyMsg]);
   const stats = el("p", { class: "chart-stats", hidden: "" });
 
   const element = el(
     "section",
-    { class: "history", "aria-label": de.history.title },
+    { class: "history", "aria-label": t.history.title },
     [
-      el("h2", { class: "history__title" }, [de.history.title]),
+      el("h2", { class: "history__title" }, [t.history.title]),
       metricTabs,
       rangeTabs,
       chartWrap,
@@ -136,7 +136,7 @@ export function createHistorySection(): HistorySection {
       const unit = METRIC_UNIT[selMetric];
       const mean = ys.reduce((a, b) => a + b, 0) / ys.length;
       const fmt = (v: number) => `${formatValue(v, selMetric)} ${unit}`;
-      stats.textContent = de.history.stats(
+      stats.textContent = t.history.stats(
         fmt(mean),
         fmt(Math.min(...ys)),
         fmt(Math.max(...ys)),
@@ -146,8 +146,8 @@ export function createHistorySection(): HistorySection {
     canvas.setAttribute(
       "aria-label",
       hasData
-        ? `${de.history.chartLabel(de.metric[selMetric].label, de.history.ranges[selRange])}, zuletzt ${formatValue(points[points.length - 1]!.y, selMetric)} ${METRIC_UNIT[selMetric]}`
-        : de.history.empty,
+        ? `${t.history.chartLabel(t.metric[selMetric].label, t.history.ranges[selRange])}, ${t.history.latest} ${formatValue(points[points.length - 1]!.y, selMetric)} ${METRIC_UNIT[selMetric]}`
+        : t.history.empty,
     );
 
     if (!hasData) return;

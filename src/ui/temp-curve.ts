@@ -1,5 +1,6 @@
 import type { ForecastHour } from "../data/model";
-import { de } from "../i18n/de";
+import { t } from "../i18n";
+import { dtf } from "./format";
 
 // Glatte Temperatur-Kurve der Vorhersage als leichtes Inline-SVG (kein Chart.js).
 // Catmull-Rom-Glättung; nur Zahlen ins Markup → kein XSS. Farben kommen via CSS-Klassen.
@@ -8,14 +9,7 @@ const W = 360;
 const H = 132;
 const PAD = { l: 8, r: 8, t: 26, b: 22 };
 
-const hourFmt = new Intl.DateTimeFormat("de-DE", {
-  hour: "2-digit",
-  timeZone: "Europe/Berlin",
-});
-const weekdayFmt = new Intl.DateTimeFormat("de-DE", {
-  weekday: "short",
-  timeZone: "Europe/Berlin",
-});
+// Locale-unabhängige Stundenzahl (nur für die Mitternachts-Logik, nicht zur Anzeige).
 const berlinHour = new Intl.DateTimeFormat("en-GB", {
   hour: "2-digit",
   hour12: false,
@@ -44,12 +38,15 @@ function r(n: number): number {
 }
 
 function xTickLabel(ms: number, isFirst: boolean): string {
-  if (isFirst) return de.forecast.now;
+  if (isFirst) return t.forecast.now;
   const hour = Number(berlinHour.format(ms));
   // Nahe Mitternacht: Wochentag statt Uhrzeit (Tageswechsel sichtbar machen).
-  return hour <= 1 || hour >= 23
-    ? weekdayFmt.format(ms)
-    : hourFmt.format(ms).replace(/\s?Uhr/, "");
+  if (hour <= 1 || hour >= 23) {
+    return dtf({ weekday: "short", timeZone: "Europe/Berlin" }).format(ms);
+  }
+  return dtf({ hour: "2-digit", timeZone: "Europe/Berlin" })
+    .format(ms)
+    .replace(/\s?Uhr/, "");
 }
 
 /** Glatte Temperatur-Kurve für die nächsten ~48 h. Null, wenn zu wenige Werte. */
@@ -110,7 +107,7 @@ export function renderTempCurve(
 
   const svg =
     `<svg class="tempcurve" viewBox="0 0 ${W} ${H}" role="img" ` +
-    `aria-label="${de.forecast.curveLabel}, ${Math.round(data[0]!.v)}° bis ${Math.round(hi)}°">` +
+    `aria-label="${t.forecast.curveLabel}, ${Math.round(data[0]!.v)}° – ${Math.round(hi)}°">` +
     `<path class="tc__area" d="${area}"/>` +
     `<path class="tc__line" d="${line}"/>` +
     marker(maxIdx) +

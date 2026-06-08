@@ -1,7 +1,7 @@
 import type { MetricKey, Trend } from "../data/model";
 
-// Alle sichtbaren Zeichenketten zentral. Englisch lässt sich später als zweite
-// Datei (en.ts) mit gleichem Schlüsselsatz ergänzen.
+// Deutsche Strings (Standard). Die Struktur definiert über `Strings` zugleich den
+// Vertrag für weitere Sprachen (siehe en.ts). Aktive Sprache liefert i18n/index.ts.
 
 export const de = {
   appName: "Eisbachwelle",
@@ -106,6 +106,7 @@ export const de = {
     empty: "Für diesen Zeitraum liegen noch nicht genug Daten vor.",
     chartLabel: (metric: string, range: string) =>
       `Verlaufsdiagramm ${metric}, Zeitraum ${range}`,
+    latest: "zuletzt",
     stats: (avg: string, min: string, max: string) =>
       `Ø ${avg}  ·  min ${min}  ·  max ${max}`,
   },
@@ -138,6 +139,6 @@ export const de = {
     "Pegel/Abfluss: Hochwassernachrichtendienst Bayern (HND) & Gewässerkundlicher Dienst Bayern (GKD). Wetter: Open-Meteo.",
   disclaimer:
     "Nicht-kommerzielles Community-Projekt. Ohne Gewähr – keine amtliche Auskunft, keine Sicherheits- oder Eignungsaussage.",
-} as const;
+};
 
 export type Strings = typeof de;

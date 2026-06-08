@@ -632,9 +632,15 @@ body {
 
 /* --- Teilen-Button --- */
 
-.share {
+.app-actions {
   margin-left: auto;
   align-self: flex-start;
+  display: flex;
+  gap: 8px;
+}
+
+.share,
+.lang {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -649,11 +655,18 @@ body {
   cursor: pointer;
 }
 
-.share:hover {
+.lang {
+  padding: 7px 11px;
+  letter-spacing: 0.02em;
+}
+
+.share:hover,
+.lang:hover {
   color: var(--text);
 }
 
-.share:focus-visible {
+.share:focus-visible,
+.lang:focus-visible {
   outline: 3px solid var(--water);
   outline-offset: 2px;
 }

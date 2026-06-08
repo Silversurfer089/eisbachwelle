@@ -8,6 +8,7 @@ import {
   Tooltip,
   type ChartConfiguration,
 } from "chart.js";
+import { dtf, nfmt } from "../ui/format";
 
 // Nur die wirklich genutzten Chart.js-Bausteine registrieren → kleineres Bundle.
 // Bewusst KEIN Datums-Adapter: Die X-Achse ist linear (ms-Zeitstempel), Tick- und
@@ -28,24 +29,18 @@ export interface ChartPoint {
 
 export type RangeMode = "24h" | "7d" | "30d";
 
-const timeFmt = new Intl.DateTimeFormat("de-DE", {
-  hour: "2-digit",
-  minute: "2-digit",
-  timeZone: "Europe/Berlin",
-});
-const dayFmt = new Intl.DateTimeFormat("de-DE", {
-  day: "2-digit",
-  month: "2-digit",
-  timeZone: "Europe/Berlin",
-});
-const fullFmt = new Intl.DateTimeFormat("de-DE", {
-  dateStyle: "short",
-  timeStyle: "short",
-  timeZone: "Europe/Berlin",
-});
-
 function tickLabel(ms: number, mode: RangeMode): string {
-  return mode === "24h" ? timeFmt.format(ms) : dayFmt.format(ms);
+  return mode === "24h"
+    ? dtf({
+        hour: "2-digit",
+        minute: "2-digit",
+        timeZone: "Europe/Berlin",
+      }).format(ms)
+    : dtf({
+        day: "2-digit",
+        month: "2-digit",
+        timeZone: "Europe/Berlin",
+      }).format(ms);
 }
 
 function cssVar(name: string): string {
@@ -108,11 +103,14 @@ export function createLineChart(canvas: HTMLCanvasElement): LineChart {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: (items) => fullFmt.format(Number(items[0]?.parsed.x)),
+            title: (items) =>
+              dtf({
+                dateStyle: "short",
+                timeStyle: "short",
+                timeZone: "Europe/Berlin",
+              }).format(Number(items[0]?.parsed.x)),
             label: (item) =>
-              `${new Intl.NumberFormat("de-DE", {
-                maximumFractionDigits: 2,
-              }).format(Number(item.parsed.y))} ${unit}`,
+              `${nfmt({ maximumFractionDigits: 2 }).format(Number(item.parsed.y))} ${unit}`,
           },
         },
       },

@@ -1,6 +1,43 @@
 import type { MetricKey } from "../data/model";
+import { locale } from "../i18n";
 
-// Formatierung in deutscher Lokale. Reine Darstellungslogik, keine Geschäftslogik.
+// Locale-bewusste Formatierung: Zahlen/Datum richten sich nach der aktiven Sprache
+// (Deutsch → de-DE, Englisch → en-GB). Formatter werden je (Locale + Optionen) gecacht.
+
+const nfCache = new Map<string, Intl.NumberFormat>();
+export function nfmt(opts: Intl.NumberFormatOptions = {}): Intl.NumberFormat {
+  const key = locale() + JSON.stringify(opts);
+  let f = nfCache.get(key);
+  if (!f) {
+    f = new Intl.NumberFormat(locale(), opts);
+    nfCache.set(key, f);
+  }
+  return f;
+}
+
+const dtCache = new Map<string, Intl.DateTimeFormat>();
+export function dtf(
+  opts: Intl.DateTimeFormatOptions = {},
+): Intl.DateTimeFormat {
+  const key = locale() + JSON.stringify(opts);
+  let f = dtCache.get(key);
+  if (!f) {
+    f = new Intl.DateTimeFormat(locale(), opts);
+    dtCache.set(key, f);
+  }
+  return f;
+}
+
+const rtCache = new Map<string, Intl.RelativeTimeFormat>();
+function rtf(): Intl.RelativeTimeFormat {
+  const base = locale().slice(0, 2);
+  let f = rtCache.get(base);
+  if (!f) {
+    f = new Intl.RelativeTimeFormat(base, { numeric: "auto" });
+    rtCache.set(base, f);
+  }
+  return f;
+}
 
 const FRACTION_DIGITS: Record<MetricKey, number> = {
   flow: 1,
@@ -9,51 +46,35 @@ const FRACTION_DIGITS: Record<MetricKey, number> = {
   airTemp: 1,
 };
 
-const numberFormats: Partial<Record<MetricKey, Intl.NumberFormat>> = {};
-
-function numberFormat(metric: MetricKey): Intl.NumberFormat {
-  let fmt = numberFormats[metric];
-  if (!fmt) {
-    const digits = FRACTION_DIGITS[metric];
-    fmt = new Intl.NumberFormat("de-DE", {
-      minimumFractionDigits: digits,
-      maximumFractionDigits: digits,
-    });
-    numberFormats[metric] = fmt;
-  }
-  return fmt;
-}
-
-/** Formatiert einen Messwert in deutscher Schreibweise (Komma als Dezimaltrenner). */
+/** Formatiert einen Messwert in der aktiven Lokale. */
 export function formatValue(value: number, metric: MetricKey): string {
-  return numberFormat(metric).format(value);
+  const digits = FRACTION_DIGITS[metric];
+  return nfmt({
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  }).format(value);
 }
 
-const absoluteFormat = new Intl.DateTimeFormat("de-DE", {
-  dateStyle: "short",
-  timeStyle: "short",
-  timeZone: "Europe/Berlin",
-});
-
-/** Absoluter Zeitstempel in Münchner Zeit, z. B. "03.06.26, 15:15". */
+/** Absoluter Zeitstempel in Münchner Zeit, lokalisiert. */
 export function formatAbsolute(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return iso;
-  return absoluteFormat.format(d);
+  return dtf({
+    dateStyle: "short",
+    timeStyle: "short",
+    timeZone: "Europe/Berlin",
+  }).format(d);
 }
 
-const relativeFormat = new Intl.RelativeTimeFormat("de", { numeric: "auto" });
-
-/** Relative Zeit zur Gegenwart, z. B. "vor 5 Minuten". */
+/** Relative Zeit zur Gegenwart, lokalisiert (z. B. „vor 5 Minuten" / „5 minutes ago"). */
 export function formatRelative(iso: string, now: Date = new Date()): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return iso;
-  const diffMs = then - now.getTime();
-  const diffMin = Math.round(diffMs / 60_000);
+  const diffMin = Math.round((then - now.getTime()) / 60_000);
 
-  if (Math.abs(diffMin) < 60) return relativeFormat.format(diffMin, "minute");
+  if (Math.abs(diffMin) < 60) return rtf().format(diffMin, "minute");
   const diffHour = Math.round(diffMin / 60);
-  if (Math.abs(diffHour) < 24) return relativeFormat.format(diffHour, "hour");
+  if (Math.abs(diffHour) < 24) return rtf().format(diffHour, "hour");
   const diffDay = Math.round(diffHour / 24);
-  return relativeFormat.format(diffDay, "day");
+  return rtf().format(diffDay, "day");
 }

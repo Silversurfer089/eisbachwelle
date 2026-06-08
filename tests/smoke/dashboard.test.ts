@@ -1,10 +1,13 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import { validateCurrent, validateHistory } from "../../src/data/loader";
 import { present } from "../../src/ui/present";
 import { renderDashboard } from "../../src/ui/dashboard";
+import { setLang } from "../../src/i18n";
 
 // Smoke-Test: Mock-Daten -> Presenter -> DOM. Prüft, dass das Dashboard die
 // wichtigsten Werte sichtbar rendert und mit fehlenden Messgrößen umgeht.
+// Sprache deterministisch auf Deutsch (jsdom-Locale wäre sonst evtl. Englisch).
+beforeAll(() => setLang("de"));
 
 const now = new Date("2026-06-03T13:20:00Z");
 

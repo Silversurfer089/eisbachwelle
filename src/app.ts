@@ -10,7 +10,7 @@ import {
 import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
 import { el } from "./ui/dom";
-import { de } from "./i18n/de";
+import { t, onLangChange } from "./i18n";
 
 // Lädt alle 5 Min neu (Quelle liefert ~15-Min-Werte; kein Sekundentakt).
 const REFRESH_MS = 5 * 60_000;
@@ -25,6 +25,15 @@ let dashSlot: HTMLElement | null = null;
 let contextSlot: HTMLElement | null = null;
 let forecastSlot: HTMLElement | null = null;
 let historySection: HistorySection | null = null;
+let rootEl: HTMLElement | null = null;
+
+/** Setzt die Shell zurück, sodass sie (z. B. nach Sprachwechsel) neu aufgebaut wird. */
+function resetShell(): void {
+  dashSlot = null;
+  contextSlot = null;
+  forecastSlot = null;
+  historySection = null;
+}
 
 function renderMessage(
   root: HTMLElement,
@@ -44,7 +53,7 @@ function renderMessage(
   ];
   if (retry) {
     const button = el("button", { class: "retry", type: "button" }, [
-      de.status.retry,
+      t.status.retry,
     ]);
     button.addEventListener("click", retry);
     children.push(button);
@@ -107,7 +116,7 @@ async function refresh(root: HTMLElement): Promise<void> {
     } else {
       renderMessage(
         root,
-        de.status.loadError,
+        t.status.loadError,
         "error",
         () => void refresh(root),
       );
@@ -116,7 +125,8 @@ async function refresh(root: HTMLElement): Promise<void> {
 }
 
 export async function startApp(root: HTMLElement): Promise<void> {
-  renderMessage(root, de.status.loading, "loading");
+  rootEl = root;
+  renderMessage(root, t.status.loading, "loading");
   await refresh(root);
 
   if (timer !== undefined) window.clearInterval(timer);
@@ -124,5 +134,17 @@ export async function startApp(root: HTMLElement): Promise<void> {
 
   document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "visible") void refresh(root);
+  });
+
+  // Sprachwechsel: Shell neu aufbauen (Tab-Labels etc. werden einmalig erzeugt).
+  onLangChange(() => {
+    if (!rootEl) return;
+    resetShell();
+    if (lastVM && lastHistory) {
+      ensureShell(rootEl);
+      paint(lastHistory);
+    } else {
+      void refresh(rootEl);
+    }
   });
 }

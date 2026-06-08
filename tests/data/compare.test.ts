@@ -19,7 +19,7 @@ describe("deltaToYesterday", () => {
   });
 
   it("nimmt den nächstgelegenen Punkt im Toleranzfenster", () => {
-    const series = [p(25, 21.5), p(23, 22.5)]; // beide ~24h, 23h näher
+    const series = [p(26, 21.5), p(23, 22.5)]; // 23 h (Δ1h) näher als 26 h (Δ2h)
     const res = deltaToYesterday(series, 24, nowMs);
     expect(res!.yesterday).toBe(22.5);
   });

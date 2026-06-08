@@ -1,0 +1,140 @@
+import type { Strings } from "./de";
+
+// English strings. Must mirror the shape of `Strings` (see de.ts).
+
+export const en: Strings = {
+  appName: "Eisbach Wave",
+  location: "Himmelreichbrücke · English Garden, Munich",
+
+  metric: {
+    flow: { label: "Discharge", hint: "Most important value for the wave" },
+    level: { label: "Water level", hint: "" },
+    waterTemp: { label: "Water temperature", hint: "" },
+    airTemp: { label: "Air temperature", hint: "" },
+  },
+
+  trend: {
+    rising: "rising",
+    falling: "falling",
+    stable: "steady",
+    unknown: "no trend",
+  },
+
+  yesterday: {
+    same: "≈ same as yesterday",
+    delta: (signed: string) => `${signed} vs. yesterday`,
+  },
+
+  neoprene: {
+    prefix: "Wetsuit",
+    boardshorts: "boardshorts or thin",
+    w32: "3/2 suit",
+    w43: "4/3 suit",
+    w54: "5/4 + boots",
+    winter: "5/4 with hood",
+  },
+
+  share: {
+    action: "Share",
+    title: "Eisbach Wave, Munich",
+    copied: "Copied to clipboard.",
+    line: (flow: string, level: string, water: string) =>
+      `Eisbach Wave: discharge ${flow}, level ${level}, water ${water}.`,
+  },
+
+  about: {
+    summary: "About & sources",
+    what: "Non-commercial community project for the Eisbach wave. No tracking, no ads, no accounts.",
+    sourcesTitle: "Data sources",
+    sourceHnd: "Bavarian Flood Information Service (HND)",
+    sourceGkd: "Bavarian Hydrological Service (GKD)",
+    sourceMeteo: "Open-Meteo (weather)",
+    methodTitle: "About the ranking",
+    method:
+      "The percentile ranking is derived purely from the data collected so far and is only a rough orientation – not a quality, suitability or safety judgement.",
+    sourceCode: "Source code (GitHub)",
+    repoUrl: "https://github.com/Silversurfer089/eisbachwellle",
+  },
+
+  status: {
+    updatedPrefix: "Updated:",
+    stale: "Data outdated",
+    staleHint:
+      "No fresh values could be loaded. Showing the last known reading.",
+    offline: "Offline – last known reading",
+    noData: "No data available",
+    loadError: "Could not load data.",
+    loading: "Loading data …",
+    noValue: "—",
+    measuredAt: "measured",
+    retry: "Try again",
+  },
+
+  update: {
+    available: "New version available.",
+    action: "Update",
+    offlineReady: "App available offline.",
+  },
+
+  context: {
+    title: "Ranking",
+    trendLead: "Discharge has recently been",
+    trendUnknown: "Too few values for a short-term trend right now.",
+    percentile: (p: number, daysLabel: string) =>
+      `Currently higher than about ${p}% of readings ${daysLabel}.`,
+    rangeLabel: (lo: string, hi: string) => `Range so far: ${lo} – ${hi}`,
+    note: "Orientation from the data collected so far – not a quality, suitability or safety judgement.",
+    building:
+      "The data base is still growing; the ranking will become more meaningful over time.",
+    insufficient:
+      "Not enough history yet for a solid ranking. It appears once enough readings have been collected.",
+    daysAgo: (n: number) =>
+      n >= 1 ? `over the last ~${n} days` : "over the last hours",
+  },
+
+  history: {
+    title: "History",
+    metricGroupLabel: "Choose metric",
+    rangeGroupLabel: "Choose period",
+    ranges: {
+      "24h": "24 h",
+      "7d": "7 days",
+      "30d": "30 days",
+    },
+    empty: "Not enough data for this period yet.",
+    chartLabel: (metric: string, range: string) =>
+      `History chart ${metric}, period ${range}`,
+    latest: "latest",
+    stats: (avg: string, min: string, max: string) =>
+      `Avg ${avg}  ·  min ${min}  ·  max ${max}`,
+  },
+
+  forecast: {
+    title: "Forecast",
+    hourlyLabel: "Hourly trend",
+    curveLabel: "Temperature trend",
+    now: "Now",
+    sourceNote: "Air temperature & precipitation · Open-Meteo",
+    waterNote:
+      "There is no reliable daily forecast for water temperature, discharge or level – discharge is regulated and very stable in the short term.",
+    today: "Today",
+    tomorrow: "Tomorrow",
+    tempRange: (max: string, min: string) => `${max}° / ${min}°`,
+    precip: (mm: string, prob: string) => `${mm} mm · ${prob}%`,
+    weather: {
+      clear: "Clear",
+      cloudy: "Cloudy",
+      fog: "Fog",
+      rain: "Rain",
+      snow: "Snow",
+      storm: "Thunderstorm",
+      unknown: "—",
+    },
+  },
+
+  sourcesLabel: "Data sources",
+  attribution:
+    "Level/discharge: Bavarian Flood Information Service (HND) & Bavarian Hydrological Service (GKD). Weather: Open-Meteo.",
+  disclaimer:
+    "Non-commercial community project. No warranty – not an official statement, no safety or suitability claim.",
+};

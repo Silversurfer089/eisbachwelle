@@ -1,20 +1,18 @@
-import { de } from "../i18n/de";
+import { t, getLang, setLang } from "../i18n";
 import { wetsuitClass } from "../data/domain/neoprene";
 import { weatherKey } from "../data/domain/weather";
 import type { ForecastDay, ForecastHour } from "../data/model";
-import { formatAbsolute, formatRelative, formatValue } from "./format";
+import {
+  dtf,
+  formatAbsolute,
+  formatRelative,
+  formatValue,
+  nfmt,
+} from "./format";
 import { el, svgIcon } from "./dom";
 import { trendIcon, weatherIcon } from "./icons";
 import { renderTempCurve } from "./temp-curve";
 import type { DashboardVM, MetricVM } from "./present";
-
-const tempFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 0 });
-const mmFmt = new Intl.NumberFormat("de-DE", { maximumFractionDigits: 1 });
-const weekdayFmt = new Intl.DateTimeFormat("de-DE", { weekday: "short" });
-const hourFmt = new Intl.DateTimeFormat("de-DE", {
-  hour: "2-digit",
-  timeZone: "Europe/Berlin",
-});
 
 // Reine Render-Schicht: baut aus dem View-Model DOM-Knoten. Keine Datenbeschaffung,
 // keine Trend-/Stale-Berechnung (passiert im Presenter / in der Domäne).
@@ -26,7 +24,7 @@ function neopreneHint(m: MetricVM): HTMLElement | null {
   const cls = wetsuitClass(m.reading.value);
   if (!cls) return null;
   return el("p", { class: "card__hint card__hint--neo" }, [
-    `${de.neoprene.prefix}: ${de.neoprene[cls]}`,
+    `${t.neoprene.prefix}: ${t.neoprene[cls]}`,
   ]);
 }
 
@@ -35,11 +33,27 @@ function yesterdayLine(m: MetricVM): HTMLElement | null {
   const absFmt = formatValue(Math.abs(m.yesterday.delta), m.key);
   const text =
     absFmt === formatValue(0, m.key)
-      ? de.yesterday.same
-      : de.yesterday.delta(
+      ? t.yesterday.same
+      : t.yesterday.delta(
           `${m.yesterday.delta > 0 ? "+" : "−"}${absFmt} ${m.reading.unit}`,
         );
   return el("p", { class: "card__yday" }, [text]);
+}
+
+function langButton(): HTMLElement {
+  const other = getLang() === "de" ? "en" : "de";
+  const btn = el(
+    "button",
+    {
+      class: "lang",
+      type: "button",
+      "aria-label":
+        other === "en" ? "Switch to English" : "Auf Deutsch umschalten",
+    },
+    [other.toUpperCase()],
+  );
+  btn.addEventListener("click", () => setLang(other));
+  return btn;
 }
 
 function buildShareText(vm: DashboardVM): string {
@@ -49,18 +63,18 @@ function buildShareText(vm: DashboardVM): string {
     const reading = r(key);
     return reading
       ? `${formatValue(reading.value, key)} ${reading.unit}`
-      : de.status.noValue;
+      : t.status.noValue;
   };
-  return de.share.line(fmt("flow"), fmt("level"), fmt("waterTemp"));
+  return t.share.line(fmt("flow"), fmt("level"), fmt("waterTemp"));
 }
 
 function shareButton(vm: DashboardVM): HTMLElement {
   const btn = el(
     "button",
-    { class: "share", type: "button", "aria-label": de.share.action },
+    { class: "share", type: "button", "aria-label": t.share.action },
     [
       svgIcon(SHARE_ICON),
-      el("span", { class: "share__label" }, [de.share.action]),
+      el("span", { class: "share__label" }, [t.share.action]),
     ],
   );
   btn.addEventListener("click", () => {
@@ -74,13 +88,13 @@ function shareButton(vm: DashboardVM): HTMLElement {
       }) => Promise<void>;
     };
     if (typeof nav.share === "function") {
-      void nav.share({ title: de.share.title, text, url }).catch(() => {});
+      void nav.share({ title: t.share.title, text, url }).catch(() => {});
     } else if (navigator.clipboard) {
       void navigator.clipboard.writeText(`${text} ${url}`).then(() => {
         const label = btn.querySelector(".share__label");
         if (label) {
           const prev = label.textContent;
-          label.textContent = de.share.copied;
+          label.textContent = t.share.copied;
           window.setTimeout(() => (label.textContent = prev), 1600);
         }
       });
@@ -90,7 +104,7 @@ function shareButton(vm: DashboardVM): HTMLElement {
 }
 
 function metricCard(m: MetricVM, now: Date): HTMLElement {
-  const meta = de.metric[m.key];
+  const meta = t.metric[m.key];
   const isPrimary = m.key === "flow";
   const classes = ["card"];
   if (isPrimary) classes.push("card--primary");
@@ -109,7 +123,7 @@ function metricCard(m: MetricVM, now: Date): HTMLElement {
       ]),
     );
 
-    const trendText = de.trend[m.trend];
+    const trendText = t.trend[m.trend];
     children.push(
       el("p", { class: `card__trend trend--${m.trend}` }, [
         svgIcon(trendIcon(m.trend)),
@@ -122,17 +136,17 @@ function metricCard(m: MetricVM, now: Date): HTMLElement {
         "p",
         {
           class: "card__time",
-          title: `${de.status.measuredAt} ${formatAbsolute(m.reading.t)}`,
+          title: `${t.status.measuredAt} ${formatAbsolute(m.reading.t)}`,
         },
-        [`${de.status.measuredAt} ${formatRelative(m.reading.t, now)}`],
+        [`${t.status.measuredAt} ${formatRelative(m.reading.t, now)}`],
       ),
     );
   } else {
     children.push(
       el("p", { class: "card__value card__value--empty" }, [
-        el("span", { class: "card__number" }, [de.status.noValue]),
+        el("span", { class: "card__number" }, [t.status.noValue]),
       ]),
-      el("p", { class: "card__time" }, [de.status.noData]),
+      el("p", { class: "card__time" }, [t.status.noData]),
     );
   }
 
@@ -147,8 +161,8 @@ function metricCard(m: MetricVM, now: Date): HTMLElement {
   if (neo) children.push(neo);
 
   const ariaLabel = m.reading
-    ? `${meta.label}: ${formatValue(m.reading.value, m.key)} ${m.reading.unit}, ${de.trend[m.trend]}, ${de.status.measuredAt} ${formatRelative(m.reading.t, now)}`
-    : `${meta.label}: ${de.status.noData}`;
+    ? `${meta.label}: ${formatValue(m.reading.value, m.key)} ${m.reading.unit}, ${t.trend[m.trend]}, ${t.status.measuredAt} ${formatRelative(m.reading.t, now)}`
+    : `${meta.label}: ${t.status.noData}`;
 
   return el(
     "article",
@@ -173,7 +187,7 @@ function statusLine(vm: DashboardVM, now: Date): HTMLElement {
           class: "status__stamp",
           title: formatAbsolute(vm.freshestAt),
         },
-        [`${de.status.updatedPrefix} ${formatRelative(vm.freshestAt, now)}`],
+        [`${t.status.updatedPrefix} ${formatRelative(vm.freshestAt, now)}`],
       ),
     );
   }
@@ -185,9 +199,9 @@ function statusLine(vm: DashboardVM, now: Date): HTMLElement {
         {
           class: "badge badge--stale",
           role: "status",
-          title: de.status.staleHint,
+          title: t.status.staleHint,
         },
-        [de.status.stale],
+        [t.status.stale],
       ),
     );
   }
@@ -201,28 +215,31 @@ function dayLabel(dateStr: string, now: Date): string {
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
   const diff = Math.round((target.getTime() - today.getTime()) / 86_400_000);
-  if (diff === 0) return de.forecast.today;
-  if (diff === 1) return de.forecast.tomorrow;
-  return weekdayFmt.format(d);
+  if (diff === 0) return t.forecast.today;
+  if (diff === 1) return t.forecast.tomorrow;
+  return dtf({ weekday: "short" }).format(d);
 }
 
 function forecastDay(d: ForecastDay, now: Date): HTMLElement {
   const key = weatherKey(d.code);
   const temp =
     d.tMax !== null && d.tMin !== null
-      ? de.forecast.tempRange(tempFmt.format(d.tMax), tempFmt.format(d.tMin))
-      : de.status.noValue;
+      ? t.forecast.tempRange(
+          nfmt({ maximumFractionDigits: 0 }).format(d.tMax),
+          nfmt({ maximumFractionDigits: 0 }).format(d.tMin),
+        )
+      : t.status.noValue;
   const children: HTMLElement[] = [
     el("p", { class: "fc-day__name" }, [dayLabel(d.date, now)]),
-    svgIcon(weatherIcon(key), de.forecast.weather[key]),
+    svgIcon(weatherIcon(key), t.forecast.weather[key]),
     el("p", { class: "fc-day__temp" }, [temp]),
   ];
   if (d.precip !== null && d.precipProb !== null) {
     children.push(
       el("p", { class: "fc-day__precip" }, [
-        de.forecast.precip(
-          mmFmt.format(d.precip),
-          tempFmt.format(d.precipProb),
+        t.forecast.precip(
+          nfmt({ maximumFractionDigits: 1 }).format(d.precip),
+          nfmt({ maximumFractionDigits: 0 }).format(d.precipProb),
         ),
       ]),
     );
@@ -231,7 +248,7 @@ function forecastDay(d: ForecastDay, now: Date): HTMLElement {
     "article",
     {
       class: "fc-day",
-      "aria-label": `${dayLabel(d.date, now)}: ${de.forecast.weather[key]}, ${temp}`,
+      "aria-label": `${dayLabel(d.date, now)}: ${t.forecast.weather[key]}, ${temp}`,
     },
     children,
   );
@@ -239,17 +256,21 @@ function forecastDay(d: ForecastDay, now: Date): HTMLElement {
 
 function hourCell(h: ForecastHour, isFirst: boolean): HTMLElement {
   const key = weatherKey(h.code);
-  const time = isFirst ? de.forecast.now : hourFmt.format(new Date(h.t));
+  const time = isFirst
+    ? t.forecast.now
+    : dtf({ hour: "2-digit", timeZone: "Europe/Berlin" }).format(new Date(h.t));
   const children: HTMLElement[] = [
     el("p", { class: "fc-hour__time" }, [time]),
-    svgIcon(weatherIcon(key), de.forecast.weather[key]),
+    svgIcon(weatherIcon(key), t.forecast.weather[key]),
     el("p", { class: "fc-hour__temp" }, [
-      h.temp !== null ? `${tempFmt.format(h.temp)}°` : de.status.noValue,
+      h.temp !== null
+        ? `${nfmt({ maximumFractionDigits: 0 }).format(h.temp)}°`
+        : t.status.noValue,
     ]),
   ];
   const rain =
     h.precipProb !== null && h.precipProb > 0
-      ? `${tempFmt.format(h.precipProb)} %`
+      ? `${nfmt({ maximumFractionDigits: 0 }).format(h.precipProb)} %`
       : " ";
   children.push(el("p", { class: "fc-hour__precip" }, [rain]));
   return el("div", { class: "fc-hour" }, children);
@@ -269,7 +290,7 @@ function renderHourly(vm: DashboardVM, now: Date): HTMLElement | null {
     {
       class: "fc-hourly",
       role: "group",
-      "aria-label": de.forecast.hourlyLabel,
+      "aria-label": t.forecast.hourlyLabel,
     },
     hours.map((h, i) => hourCell(h, i === 0)),
   );
@@ -283,7 +304,7 @@ export function renderForecast(
   if (vm.forecast.length === 0 && vm.forecastHourly.length === 0) return null;
 
   const children: HTMLElement[] = [
-    el("h2", { class: "forecast__title" }, [de.forecast.title]),
+    el("h2", { class: "forecast__title" }, [t.forecast.title]),
   ];
 
   const curve = renderTempCurve(vm.forecastHourly, now);
@@ -303,13 +324,13 @@ export function renderForecast(
   }
 
   children.push(
-    el("p", { class: "forecast__source" }, [de.forecast.sourceNote]),
-    el("p", { class: "forecast__waternote" }, [de.forecast.waterNote]),
+    el("p", { class: "forecast__source" }, [t.forecast.sourceNote]),
+    el("p", { class: "forecast__waternote" }, [t.forecast.waterNote]),
   );
 
   return el(
     "section",
-    { class: "forecast", "aria-label": de.forecast.title },
+    { class: "forecast", "aria-label": t.forecast.title },
     children,
   );
 }
@@ -330,17 +351,17 @@ export function renderDashboard(
     el("div", { class: "app-brand" }, [
       logo,
       el("div", { class: "app-brand__text" }, [
-        el("h1", { class: "app-title" }, [de.appName]),
-        el("p", { class: "app-location" }, [de.location]),
+        el("h1", { class: "app-title" }, [t.appName]),
+        el("p", { class: "app-location" }, [t.location]),
       ]),
-      shareButton(vm),
+      el("div", { class: "app-actions" }, [langButton(), shareButton(vm)]),
     ]),
     statusLine(vm, now),
   ]);
 
   const grid = el(
     "section",
-    { class: "grid", "aria-label": de.appName },
+    { class: "grid", "aria-label": t.appName },
     vm.metrics.map((m) => metricCard(m, now)),
   );
 
@@ -355,7 +376,7 @@ function extLink(href: string, text: string): HTMLElement {
 
 /** Aufklappbarer Über-/Quellen-Bereich inkl. Andrang-Link (Google Maps). */
 export function renderAbout(): HTMLElement {
-  const a = de.about;
+  const a = t.about;
   return el("details", { class: "about" }, [
     el("summary", { class: "about__summary" }, [a.summary]),
     el("div", { class: "about__body" }, [
@@ -384,7 +405,7 @@ export function renderAbout(): HTMLElement {
 /** Statischer Fuß mit Quellen-Attribution und Disclaimer. */
 export function renderFooter(): HTMLElement {
   return el("footer", { class: "app-footer" }, [
-    el("p", { class: "attribution" }, [de.attribution]),
-    el("p", { class: "disclaimer" }, [de.disclaimer]),
+    el("p", { class: "attribution" }, [t.attribution]),
+    el("p", { class: "disclaimer" }, [t.disclaimer]),
   ]);
 }

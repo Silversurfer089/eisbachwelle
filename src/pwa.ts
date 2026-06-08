@@ -1,5 +1,5 @@
 import { registerSW } from "virtual:pwa-register";
-import { de } from "./i18n/de";
+import { t } from "./i18n";
 import { el } from "./ui/dom";
 
 // Service-Worker-Registrierung + unaufdringlicher "Neue Version"-Hinweis.
@@ -10,14 +10,14 @@ function showUpdateToast(onUpdate: () => void): void {
   if (document.querySelector(".toast")) return;
 
   const button = el("button", { class: "toast__action", type: "button" }, [
-    de.update.action,
+    t.update.action,
   ]);
   button.addEventListener("click", onUpdate);
 
   const toast = el(
     "div",
     { class: "toast", role: "status", "aria-live": "polite" },
-    [el("span", {}, [de.update.available]), button],
+    [el("span", {}, [t.update.available]), button],
   );
   document.body.append(toast);
 }
