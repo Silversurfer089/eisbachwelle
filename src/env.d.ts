@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_DATA_BASE_URL?: string;
   /** GitHub-Repo-URL (im Deploy aus github.repository abgeleitet) für den Quellcode-Link. */
   readonly VITE_REPO_URL?: string;
+  /** Optionaler Cloudflare-Worker für Near-Live-Aktuellwerte (sonst nur Cron-Daten). */
+  readonly VITE_LIVE_URL?: string;
 }
 
 interface ImportMeta {

@@ -37,6 +37,9 @@ jobs:
           VITE_DATA_BASE_URL: "https://raw.githubusercontent.com/${{ github.repository }}/data/"
           # Quellcode-Link leitet sich aus dem Repo ab → übersteht Umbenennen ohne Code-Änderung.
           VITE_REPO_URL: "https://github.com/${{ github.repository }}"
+          # Near-Live: Repo-Variable LIVE_URL (Settings → Variables) = Cloudflare-Worker-URL.
+          # Leer gelassen → App nutzt nur die Cron-Daten.
+          VITE_LIVE_URL: "${{ vars.LIVE_URL }}"
       - uses: actions/upload-pages-artifact@v3
         with:
           path: dist

@@ -14,7 +14,8 @@ const CSP = [
   "img-src 'self' data:",
   "style-src 'self' 'unsafe-inline'", // Inline-style-Attribute (Balken/Gauge)
   "script-src 'self'",
-  "connect-src 'self' https://raw.githubusercontent.com", // Live-Daten (data-Branch)
+  // Cron-Daten (data-Branch) + optionaler Cloudflare-Worker (Near-Live).
+  "connect-src 'self' https://raw.githubusercontent.com https://*.workers.dev",
   "manifest-src 'self'",
   "worker-src 'self'",
   "base-uri 'self'",
