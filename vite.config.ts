@@ -7,6 +7,32 @@ import { VitePWA } from "vite-plugin-pwa";
 // (im Deploy-Workflow z. B. "/eisbachwelle/"). Lokal ist "/" korrekt.
 const base = process.env.BASE_PATH ?? "/";
 
+// Content-Security-Policy nur im Produktions-Build als <meta> einsetzen (nicht im Dev,
+// da Vites HMR Inline-Skripte/WS bräuchte). Härtet die statische, datenlose Seite ab.
+const CSP = [
+  "default-src 'self'",
+  "img-src 'self' data:",
+  "style-src 'self' 'unsafe-inline'", // Inline-style-Attribute (Balken/Gauge)
+  "script-src 'self'",
+  "connect-src 'self' https://raw.githubusercontent.com", // Live-Daten (data-Branch)
+  "manifest-src 'self'",
+  "worker-src 'self'",
+  "base-uri 'self'",
+  "form-action 'none'",
+  "frame-ancestors 'none'",
+].join("; ");
+
+const cspPlugin = {
+  name: "csp-meta",
+  apply: "build" as const,
+  transformIndexHtml(html: string) {
+    return html.replace(
+      "</title>",
+      `</title>\n    <meta http-equiv="Content-Security-Policy" content="${CSP}" />`,
+    );
+  },
+};
+
 export default defineConfig({
   base,
   build: {
@@ -14,8 +40,10 @@ export default defineConfig({
     sourcemap: true,
   },
   plugins: [
+    cspPlugin,
     VitePWA({
       registerType: "prompt",
+      injectRegister: false, // Registrierung erfolgt manuell in pwa.ts (CSP-freundlich)
       includeAssets: ["icons/*.png", "favicon.svg"],
       manifest: {
         name: "Eisbachwelle München",

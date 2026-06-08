@@ -32,13 +32,13 @@ function neopreneHint(m: MetricVM): HTMLElement | null {
 function yesterdayLine(m: MetricVM): HTMLElement | null {
   if (!m.reading || !m.yesterday) return null;
   const absFmt = formatValue(Math.abs(m.yesterday.delta), m.key);
-  const text =
-    absFmt === formatValue(0, m.key)
-      ? t.yesterday.same
-      : t.yesterday.delta(
-          `${m.yesterday.delta > 0 ? "+" : "−"}${absFmt} ${m.reading.unit}`,
-        );
-  return el("p", { class: "card__yday" }, [text]);
+  // Triviale Differenz (≈ gestern) ausblenden – reduziert Rauschen auf den Karten.
+  if (absFmt === formatValue(0, m.key)) return null;
+  return el("p", { class: "card__yday" }, [
+    t.yesterday.delta(
+      `${m.yesterday.delta > 0 ? "+" : "−"}${absFmt} ${m.reading.unit}`,
+    ),
+  ]);
 }
 
 function langButton(): HTMLElement {

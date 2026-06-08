@@ -88,6 +88,11 @@ export const de = {
 
   context: {
     title: "Einordnung",
+    amount: {
+      low: "Aktuell eher wenig Wasser",
+      mid: "Aktuell normaler Wasserstand",
+      high: "Aktuell eher viel Wasser",
+    },
     trendLead: "Der Abfluss ist zuletzt",
     trendUnknown: "Zum aktuellen Kurzzeit-Trend liegen zu wenige Werte vor.",
     // p = gerundeter Perzentilrang, days = abgedeckte Tage

@@ -44,8 +44,16 @@ function gauge(percentile: number): HTMLElement {
 export function renderContextPanel(vm: DashboardVM): HTMLElement {
   const children: HTMLElement[] = [
     el("h2", { class: "context__title" }, [t.context.title]),
-    trendSentence(vm),
   ];
+
+  if (vm.flowContext) {
+    const p = vm.flowContext.percentile;
+    const band = p < 33 ? "low" : p < 67 ? "mid" : "high";
+    children.push(
+      el("p", { class: "context__amount" }, [t.context.amount[band]]),
+    );
+  }
+  children.push(trendSentence(vm));
 
   const ctx = vm.flowContext;
   if (ctx) {

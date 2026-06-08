@@ -87,6 +87,11 @@ export const en: Strings = {
 
   context: {
     title: "Ranking",
+    amount: {
+      low: "Currently rather little water",
+      mid: "Currently a normal level",
+      high: "Currently rather a lot of water",
+    },
     trendLead: "Discharge has recently been",
     trendUnknown: "Too few values for a short-term trend right now.",
     percentile: (p: number, daysLabel: string) =>
