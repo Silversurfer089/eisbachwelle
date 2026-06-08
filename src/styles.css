@@ -126,14 +126,23 @@ body {
 }
 
 .app-brand__text {
+  flex: 1 1 auto;
   min-width: 0;
+}
+
+/* Schmale Schirme: Teilen-Knopf nur als Icon → mehr Platz für den Titel. */
+@media (max-width: 400px) {
+  .share__label {
+    display: none;
+  }
 }
 
 .app-title {
   margin: 0;
-  font-size: clamp(1.6rem, 6vw, 2.1rem);
+  font-size: clamp(1.3rem, 5.4vw, 2.1rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  text-wrap: balance;
 }
 
 .app-location {
