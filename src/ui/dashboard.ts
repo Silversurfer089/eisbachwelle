@@ -268,11 +268,16 @@ function hourCell(h: ForecastHour, isFirst: boolean): HTMLElement {
         : t.status.noValue,
     ]),
   ];
-  const rain =
-    h.precipProb !== null && h.precipProb > 0
-      ? `${nfmt({ maximumFractionDigits: 0 }).format(h.precipProb)} %`
-      : " ";
-  children.push(el("p", { class: "fc-hour__precip" }, [rain]));
+  // Niederschlagsbalken: Höhe = Regenwahrscheinlichkeit.
+  const prob = Math.max(0, Math.min(100, h.precipProb ?? 0));
+  const bar = el("div", { class: "fc-hour__bar" });
+  bar.style.height = `${prob}%`;
+  children.push(el("div", { class: "fc-hour__barwrap" }, [bar]));
+  children.push(
+    el("p", { class: "fc-hour__precip" }, [
+      prob > 0 ? `${nfmt({ maximumFractionDigits: 0 }).format(prob)} %` : " ",
+    ]),
+  );
   return el("div", { class: "fc-hour" }, children);
 }
 

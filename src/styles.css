@@ -389,6 +389,21 @@ body {
   font-variant-numeric: tabular-nums;
 }
 
+.fc-hour__barwrap {
+  display: flex;
+  align-items: flex-end;
+  width: 12px;
+  height: 24px;
+  margin-top: 2px;
+}
+
+.fc-hour__bar {
+  width: 100%;
+  min-height: 0;
+  border-radius: 3px;
+  background: var(--cool);
+}
+
 .fc-hour__precip {
   margin: 0;
   min-height: 0.95em;
