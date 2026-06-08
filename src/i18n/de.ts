@@ -26,6 +26,15 @@ export const de = {
     delta: (signed: string) => `${signed} ggü. gestern`,
   },
 
+  waterEstimate: {
+    prefix: "Wasser-Tendenz",
+    estimate: "Schätzung",
+    rising: "eher steigend",
+    falling: "eher fallend",
+    steady: "kaum Änderung",
+    unknown: "",
+  },
+
   neoprene: {
     prefix: "Neopren",
     boardshorts: "Boardshorts oder dünn",
@@ -118,7 +127,7 @@ export const de = {
     now: "Jetzt",
     sourceNote: "Lufttemperatur & Niederschlag · Open-Meteo",
     waterNote:
-      "Für Wassertemperatur, Abfluss und Pegel gibt es keine seriöse Tagesvorhersage – der Abfluss ist reguliert und kurzfristig sehr stabil.",
+      "Für Abfluss und Pegel gibt es keine seriöse Tagesvorhersage – der Kanal ist reguliert und kurzfristig sehr stabil. Die Wassertemperatur-Tendenz auf der Karte ist nur eine grobe Schätzung aus der Luft.",
     today: "Heute",
     tomorrow: "Morgen",
     tempRange: (max: string, min: string) => `${max}° / ${min}°`,

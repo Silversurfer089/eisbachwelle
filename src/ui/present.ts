@@ -4,6 +4,7 @@ import {
   type DistributionContext,
 } from "../data/domain/context";
 import { deltaToYesterday, type YesterdayDelta } from "../data/domain/compare";
+import { waterTendency, type WaterTendency } from "../data/domain/watertrend";
 import { freshestTimestamp, isStale } from "../data/loader";
 import { METRIC_KEYS } from "../data/model";
 import type {
@@ -41,6 +42,14 @@ export interface DashboardVM {
   forecast: ForecastDay[];
   /** Stündliche Vorhersage (nächste ~48 h), kann leer sein. */
   forecastHourly: ForecastHour[];
+  /** Grobe Tendenz der Wassertemperatur (Schätzung aus der Luft-Vorhersage). */
+  waterTendency: WaterTendency;
+}
+
+function average(values: number[]): number | null {
+  const finite = values.filter((v) => Number.isFinite(v));
+  if (finite.length === 0) return null;
+  return finite.reduce((a, b) => a + b, 0) / finite.length;
 }
 
 export function present(
@@ -69,6 +78,19 @@ export function present(
     ? describeContext(history.series.flow, flowReading.value)
     : null;
 
+  // Wassertemperatur-Tendenz: jüngste Luft (letzte 24 h) vs. Vorhersage-Luft (Tage).
+  const dayAgo = now.getTime() - 24 * 60 * 60 * 1000;
+  const recentAir = average(
+    history.series.airTemp
+      .filter((p) => Date.parse(p.t) >= dayAgo)
+      .map((p) => p.v),
+  );
+  const forecastAir = average(
+    current.forecast.flatMap((d) =>
+      [d.tMax, d.tMin].filter((v): v is number => v !== null),
+    ),
+  );
+
   return {
     metrics,
     fetchedAt: current.fetchedAt,
@@ -79,5 +101,6 @@ export function present(
     flowContext,
     forecast: current.forecast,
     forecastHourly: current.forecastHourly,
+    waterTendency: waterTendency(recentAir, forecastAir),
   };
 }

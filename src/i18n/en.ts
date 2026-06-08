@@ -25,6 +25,15 @@ export const en: Strings = {
     delta: (signed: string) => `${signed} vs. yesterday`,
   },
 
+  waterEstimate: {
+    prefix: "Water trend",
+    estimate: "estimate",
+    rising: "likely rising",
+    falling: "likely falling",
+    steady: "little change",
+    unknown: "",
+  },
+
   neoprene: {
     prefix: "Wetsuit",
     boardshorts: "boardshorts or thin",
@@ -116,7 +125,7 @@ export const en: Strings = {
     now: "Now",
     sourceNote: "Air temperature & precipitation · Open-Meteo",
     waterNote:
-      "There is no reliable daily forecast for water temperature, discharge or level – discharge is regulated and very stable in the short term.",
+      "There is no reliable daily forecast for discharge or level – the channel is regulated and very stable in the short term. The water-temperature trend on the card is only a rough estimate from the air forecast.",
     today: "Today",
     tomorrow: "Tomorrow",
     tempRange: (max: string, min: string) => `${max}° / ${min}°`,

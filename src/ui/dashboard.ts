@@ -1,6 +1,7 @@
 import { t, getLang, setLang } from "../i18n";
 import { wetsuitClass } from "../data/domain/neoprene";
 import { weatherKey } from "../data/domain/weather";
+import type { WaterTendency } from "../data/domain/watertrend";
 import type { ForecastDay, ForecastHour } from "../data/model";
 import {
   dtf,
@@ -103,7 +104,18 @@ function shareButton(vm: DashboardVM): HTMLElement {
   return btn;
 }
 
-function metricCard(m: MetricVM, now: Date): HTMLElement {
+function waterTendencyLine(tend: WaterTendency): HTMLElement | null {
+  if (tend === "unknown") return null;
+  return el("p", { class: "card__est" }, [
+    `${t.waterEstimate.prefix}: ${t.waterEstimate[tend]} (${t.waterEstimate.estimate})`,
+  ]);
+}
+
+function metricCard(
+  m: MetricVM,
+  now: Date,
+  waterTend: WaterTendency = "unknown",
+): HTMLElement {
   const meta = t.metric[m.key];
   const isPrimary = m.key === "flow";
   const classes = ["card"];
@@ -159,6 +171,11 @@ function metricCard(m: MetricVM, now: Date): HTMLElement {
 
   const neo = neopreneHint(m);
   if (neo) children.push(neo);
+
+  if (m.key === "waterTemp" && m.reading) {
+    const wt = waterTendencyLine(waterTend);
+    if (wt) children.push(wt);
+  }
 
   const ariaLabel = m.reading
     ? `${meta.label}: ${formatValue(m.reading.value, m.key)} ${m.reading.unit}, ${t.trend[m.trend]}, ${t.status.measuredAt} ${formatRelative(m.reading.t, now)}`
@@ -367,7 +384,7 @@ export function renderDashboard(
   const grid = el(
     "section",
     { class: "grid", "aria-label": t.appName },
-    vm.metrics.map((m) => metricCard(m, now)),
+    vm.metrics.map((m) => metricCard(m, now, vm.waterTendency)),
   );
 
   return el("div", { class: "dashboard" }, [header, grid]);
