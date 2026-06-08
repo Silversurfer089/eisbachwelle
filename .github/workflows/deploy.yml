@@ -40,7 +40,7 @@ jobs:
           # Near-Live: Repo-Variable LIVE_URL (Settings → Variables) = Cloudflare-Worker-URL.
           # Leer gelassen → App nutzt nur die Cron-Daten.
           VITE_LIVE_URL: "${{ vars.LIVE_URL }}"
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: dist
 
