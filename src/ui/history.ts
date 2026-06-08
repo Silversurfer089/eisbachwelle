@@ -22,6 +22,26 @@ const METRIC_COLOR_VAR: Record<MetricKey, string> = {
   airTemp: "--neutral",
 };
 
+// Milde Glättung NUR für die Chart-Linie (gleitender Mittelwert, zentriert).
+// Ø/min/max werden weiterhin aus den Rohwerten berechnet – keine Datenverfälschung.
+function smooth(pts: { x: number; y: number }[]): { x: number; y: number }[] {
+  if (pts.length < 5) return pts;
+  const w = pts.length > 40 ? 2 : 1; // Halbfenster
+  return pts.map((p, i) => {
+    let sum = 0;
+    let n = 0;
+    for (
+      let k = Math.max(0, i - w);
+      k <= Math.min(pts.length - 1, i + w);
+      k++
+    ) {
+      sum += pts[k]!.y;
+      n++;
+    }
+    return { x: p.x, y: sum / n };
+  });
+}
+
 function cssVar(name: string, fallback: string): string {
   const v = getComputedStyle(document.documentElement)
     .getPropertyValue(name)
@@ -153,7 +173,7 @@ export function createHistorySection(): HistorySection {
     if (!hasData) return;
     const color = cssVar(METRIC_COLOR_VAR[selMetric], "#2dd4bf");
     void withChart((c) =>
-      c.update(points, color, selRange, METRIC_UNIT[selMetric]),
+      c.update(smooth(points), color, selRange, METRIC_UNIT[selMetric]),
     );
   }
 

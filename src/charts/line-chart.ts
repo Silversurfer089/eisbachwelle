@@ -74,7 +74,7 @@ export function createLineChart(canvas: HTMLCanvasElement): LineChart {
           fill: true,
           pointRadius: 0,
           pointHitRadius: 12,
-          tension: 0.25,
+          tension: 0.45,
         },
       ],
     },
