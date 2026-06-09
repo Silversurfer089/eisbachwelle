@@ -26,7 +26,7 @@ const METRIC_COLOR_VAR: Record<MetricKey, string> = {
 // Ø/min/max werden aus den Rohwerten berechnet – keine Datenverfälschung.
 //
 // Strategie:
-//   24h → leichte Glättung (w=1, 3 Punkte à 15 Min = 45 Min)
+//   24h → Glättung (w=2, 5 Punkte à 15 Min = 75 Min Fenster)
 //   7d  → Downsampling auf 2h-Durchschnitte, dann w=4 (9 × 2h = 18h-Fenster)
 //
 // Downsampling fasst je N Messpunkte zu einem Durchschnitt zusammen; das
@@ -38,7 +38,7 @@ const BUCKET_MS: Record<RangeMode, number> = {
   "7d": 2 * 60 * 60_000,       // 2h-Buckets (~84 Punkte statt 672)
   "30d": 2 * 60 * 60_000,      // 2h-Buckets (Fallback, Tab nicht mehr angezeigt)
 };
-const SMOOTH_W: Record<RangeMode, number> = { "24h": 1, "7d": 4, "30d": 4 };
+const SMOOTH_W: Record<RangeMode, number> = { "24h": 2, "7d": 4, "30d": 4 };
 
 function downsample(
   pts: { x: number; y: number }[],
