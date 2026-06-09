@@ -149,6 +149,31 @@ export const de = {
     },
   },
 
+  community: {
+    title: "Community-Status",
+    noVotes: "Noch keine Meldungen",
+    voteCount: (n: number) => `${n} ${n === 1 ? "Meldung" : "Meldungen"}`,
+    lastVote: (rel: string) => `zuletzt ${rel}`,
+    voteBtnLabel: "Jetzt melden",
+    thanks: "Danke für deine Meldung!",
+    cooldown: "Du hast bereits gemeldet – nächste Meldung in einer Stunde.",
+    error: "Meldung konnte nicht gespeichert werden.",
+    status: {
+      good: "Läuft gut",
+      okay: "Läuft mäßig",
+      poor: "Läuft nicht",
+      closed: "Außer Betrieb",
+    },
+    statusHint: {
+      good: "Welle steht, lohnt sich",
+      okay: "Welle steht, aber nicht optimal",
+      poor: "Kein Surfen möglich",
+      closed: "Bachausker / Stadteingriff",
+    },
+    disclaimer:
+      "Community-Meldungen von Surfenden vor Ort. Kein Ersatz für eigene Einschätzung.",
+  },
+
   sourcesLabel: "Datenquellen",
   attribution:
     "Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de (HND/GKD · CC BY 4.0). Wetter: Open-Meteo.",

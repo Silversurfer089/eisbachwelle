@@ -147,6 +147,31 @@ export const en: Strings = {
     },
   },
 
+  community: {
+    title: "Community status",
+    noVotes: "No reports yet",
+    voteCount: (n: number) => `${n} ${n === 1 ? "report" : "reports"}`,
+    lastVote: (rel: string) => `last ${rel}`,
+    voteBtnLabel: "Report now",
+    thanks: "Thanks for your report!",
+    cooldown: "You already reported – next report in an hour.",
+    error: "Could not save report.",
+    status: {
+      good: "Running well",
+      okay: "Running, but moderate",
+      poor: "Not running",
+      closed: "Out of service",
+    },
+    statusHint: {
+      good: "Wave is up, worth it",
+      okay: "Wave is up, but not ideal",
+      poor: "No surfing possible",
+      closed: "Bachausker / city intervention",
+    },
+    disclaimer:
+      "Community reports from surfers on-site. Not a substitute for your own judgement.",
+  },
+
   sourcesLabel: "Data sources",
   attribution:
     "Data source: Bavarian State Office for the Environment, www.lfu.bayern.de (HND/GKD · CC BY 4.0). Weather: Open-Meteo.",

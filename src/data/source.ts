@@ -1,5 +1,11 @@
 import { validateCurrent, validateHistory } from "./loader";
-import type { CurrentData, HistoryData } from "./model";
+import type {
+  CommunityStatus,
+  CurrentData,
+  HistoryData,
+  VoteStatus,
+} from "./model";
+import { VOTE_STATUSES } from "./model";
 
 /** Basis-URL der Datendateien (siehe src/env.d.ts). Garantiert mit "/" am Ende. */
 function dataBase(): string {
@@ -67,4 +73,58 @@ export async function loadCurrent(signal?: AbortSignal): Promise<CurrentData> {
 /** Lädt und validiert die Historie. Wirft bei Netz-/Format-Fehlern. */
 export async function loadHistory(signal?: AbortSignal): Promise<HistoryData> {
   return validateHistory(await fetchJson("history.json", signal));
+}
+
+/** Holt den aktuellen Community-Status vom Worker. Gibt null zurück wenn kein
+ *  Worker konfiguriert oder die Anfrage fehlschlägt (Community ist optional). */
+export async function loadCommunityStatus(
+  signal?: AbortSignal,
+): Promise<CommunityStatus | null> {
+  const base = import.meta.env.VITE_LIVE_URL;
+  if (!base) return null;
+  try {
+    const timeout = AbortSignal.timeout(6000);
+    const sig = signal ? AbortSignal.any([signal, timeout]) : timeout;
+    const res = await fetch(`${base}/wave-status`, { signal: sig });
+    if (!res.ok) return null;
+    const d = (await res.json()) as Record<string, unknown>;
+    const counts = {} as Record<VoteStatus, number>;
+    for (const s of VOTE_STATUSES)
+      counts[s] = typeof d.counts === "object" && d.counts !== null
+        ? Number((d.counts as Record<string, unknown>)[s] ?? 0)
+        : 0;
+    const total = typeof d.total === "number" ? d.total : 0;
+    const raw = typeof d.status === "string" && VOTE_STATUSES.includes(d.status as VoteStatus)
+      ? (d.status as VoteStatus)
+      : null;
+    const lastVoteAt =
+      typeof d.lastVoteAt === "string" ? d.lastVoteAt : null;
+    return { status: total > 0 ? raw : null, counts, total, lastVoteAt };
+  } catch {
+    return null;
+  }
+}
+
+/** Sendet eine Community-Stimme. Gibt "ok", "cooldown" oder "error" zurück. */
+export async function submitVote(
+  status: VoteStatus,
+  signal?: AbortSignal,
+): Promise<"ok" | "cooldown" | "error"> {
+  const base = import.meta.env.VITE_LIVE_URL;
+  if (!base) return "error";
+  try {
+    const timeout = AbortSignal.timeout(8000);
+    const sig = signal ? AbortSignal.any([signal, timeout]) : timeout;
+    const res = await fetch(`${base}/wave-vote`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ status }),
+      signal: sig,
+    });
+    if (res.status === 429) return "cooldown";
+    if (!res.ok) return "error";
+    return "ok";
+  } catch {
+    return "error";
+  }
 }

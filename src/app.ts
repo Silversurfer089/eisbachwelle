@@ -1,4 +1,4 @@
-import { loadCurrent, loadHistory } from "./data/source";
+import { loadCurrent, loadHistory, loadCommunityStatus } from "./data/source";
 import type { HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
 import {
@@ -9,6 +9,10 @@ import {
 } from "./ui/dashboard";
 import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
+import {
+  createCommunitySection,
+  type CommunitySection,
+} from "./ui/community";
 import { el } from "./ui/dom";
 import { t, onLangChange } from "./i18n";
 
@@ -23,6 +27,7 @@ let timer: number | undefined;
 // Reihenfolge: Dashboard → Einordnung → Vorhersage → Verlauf → Über → Fuß.
 let dashSlot: HTMLElement | null = null;
 let contextSlot: HTMLElement | null = null;
+let communitySection: CommunitySection | null = null;
 let forecastSlot: HTMLElement | null = null;
 let historySection: HistorySection | null = null;
 let rootEl: HTMLElement | null = null;
@@ -31,6 +36,7 @@ let rootEl: HTMLElement | null = null;
 function resetShell(): void {
   dashSlot = null;
   contextSlot = null;
+  communitySection = null;
   forecastSlot = null;
   historySection = null;
 }
@@ -67,6 +73,7 @@ function ensureShell(root: HTMLElement): void {
   if (
     dashSlot &&
     contextSlot &&
+    communitySection &&
     forecastSlot &&
     historySection &&
     root.contains(dashSlot)
@@ -74,12 +81,14 @@ function ensureShell(root: HTMLElement): void {
     return;
   dashSlot = el("div", { class: "dash-slot" });
   contextSlot = el("div", { class: "context-slot" });
+  communitySection = createCommunitySection();
   forecastSlot = el("div", { class: "forecast-slot" });
   historySection = createHistorySection();
   root.replaceChildren(
     el("div", { class: "app-shell" }, [
       dashSlot,
       contextSlot,
+      communitySection.element,
       forecastSlot,
       historySection.element,
       renderAbout(),
@@ -97,6 +106,13 @@ function paint(history: HistoryData): void {
   historySection!.update(history);
 }
 
+/** Aktualisiert den Community-Status separat (optional, kein Fehler wenn nicht verfügbar). */
+async function refreshCommunity(): Promise<void> {
+  if (!communitySection) return;
+  const cs = await loadCommunityStatus();
+  communitySection.update(cs);
+}
+
 async function refresh(root: HTMLElement): Promise<void> {
   try {
     const [current, history] = await Promise.all([
@@ -107,6 +123,7 @@ async function refresh(root: HTMLElement): Promise<void> {
     lastHistory = history;
     ensureShell(root);
     paint(history);
+    void refreshCommunity();
   } catch (err) {
     console.warn("[eisbach] Aktualisierung fehlgeschlagen:", err);
     if (lastVM && lastHistory) {

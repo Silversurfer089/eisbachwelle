@@ -99,3 +99,26 @@ export interface HistoryData {
   /** Zeitreihen je Messgröße (können fehlen oder leer sein). */
   series: Record<MetricKey, SeriesPoint[]>;
 }
+
+/**
+ * Abstimmstatus der Community (via Cloudflare Worker + KV).
+ * Null wenn kein Worker konfiguriert oder Anfrage fehlgeschlagen.
+ */
+export type VoteStatus = "good" | "okay" | "poor" | "closed";
+export const VOTE_STATUSES: readonly VoteStatus[] = [
+  "good",
+  "okay",
+  "poor",
+  "closed",
+];
+
+export interface CommunityStatus {
+  /** Dominierender Status der letzten 6 h, oder null wenn keine Stimmen. */
+  status: VoteStatus | null;
+  /** Stimmen je Status (nur letzte 6 h). */
+  counts: Record<VoteStatus, number>;
+  /** Gesamtzahl der Stimmen in den letzten 6 h. */
+  total: number;
+  /** Zeitstempel der jüngsten Stimme, ISO 8601 UTC, oder null. */
+  lastVoteAt: string | null;
+}
