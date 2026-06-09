@@ -13,7 +13,7 @@ const RANGE_MS: Record<RangeMode, number> = {
   "7d": 7 * 24 * 60 * 60 * 1000,
   "30d": 30 * 24 * 60 * 60 * 1000,
 };
-const RANGE_ORDER: RangeMode[] = ["24h", "7d", "30d"];
+const RANGE_ORDER: RangeMode[] = ["24h", "7d"];
 
 const METRIC_COLOR_VAR: Record<MetricKey, string> = {
   flow: "--water",
@@ -24,9 +24,17 @@ const METRIC_COLOR_VAR: Record<MetricKey, string> = {
 
 // Milde Glättung NUR für die Chart-Linie (gleitender Mittelwert, zentriert).
 // Ø/min/max werden weiterhin aus den Rohwerten berechnet – keine Datenverfälschung.
-function smooth(pts: { x: number; y: number }[]): { x: number; y: number }[] {
-  if (pts.length < 5) return pts;
-  const w = pts.length > 40 ? 2 : 1; // Halbfenster
+// Halbfenster je Zeitraum: 24h → 1 (3 Punkte = 45 Min), 7d → 4 (9 Punkte = ~2 h).
+// GKD-Daten kommen in 15-Min-Auflösung; ohne ausreichende Glättung bleiben
+// Abfluss/Wasserstand-Kurven trotz tension=0.45 sichtbar zackig.
+const SMOOTH_W: Record<RangeMode, number> = { "24h": 1, "7d": 4, "30d": 5 };
+
+function smooth(
+  pts: { x: number; y: number }[],
+  mode: RangeMode,
+): { x: number; y: number }[] {
+  const w = SMOOTH_W[mode];
+  if (pts.length < 2 * w + 1) return pts;
   return pts.map((p, i) => {
     let sum = 0;
     let n = 0;
@@ -173,7 +181,7 @@ export function createHistorySection(): HistorySection {
     if (!hasData) return;
     const color = cssVar(METRIC_COLOR_VAR[selMetric], "#2dd4bf");
     void withChart((c) =>
-      c.update(smooth(points), color, selRange, METRIC_UNIT[selMetric]),
+      c.update(smooth(points, selRange), color, selRange, METRIC_UNIT[selMetric]),
     );
   }
 
