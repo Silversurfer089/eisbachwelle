@@ -406,6 +406,7 @@ export function renderAbout(): HTMLElement {
 
       el("h3", { class: "about__h" }, [a.sourcesTitle]),
       el("ul", { class: "about__list" }, [
+        el("li", {}, [extLink("https://www.lfu.bayern.de", a.sourceLfu)]),
         el("li", {}, [
           extLink(
             "https://www.hnd.bayern.de/pegel/isar/muenchen-himmelreichbruecke-16515005",

@@ -56,6 +56,7 @@ export const de = {
     summary: "Über & Quellen",
     what: "Nicht-kommerzielles Community-Projekt für die Eisbachwelle. Kein Tracking, keine Werbung, keine Accounts.",
     sourcesTitle: "Datenquellen",
+    sourceLfu: "Bayerisches Landesamt für Umwelt (LfU) – Datenlizenz CC BY 4.0",
     sourceHnd: "Hochwassernachrichtendienst Bayern (HND)",
     sourceGkd: "Gewässerkundlicher Dienst Bayern (GKD)",
     sourceMeteo: "Open-Meteo (Wetter)",
@@ -150,7 +151,7 @@ export const de = {
 
   sourcesLabel: "Datenquellen",
   attribution:
-    "Pegel/Abfluss: Hochwassernachrichtendienst Bayern (HND) & Gewässerkundlicher Dienst Bayern (GKD). Wetter: Open-Meteo.",
+    "Datenquelle: Bayerisches Landesamt für Umwelt, www.lfu.bayern.de (HND/GKD · CC BY 4.0). Wetter: Open-Meteo.",
   disclaimer:
     "Nicht-kommerzielles Community-Projekt. Ohne Gewähr – keine amtliche Auskunft, keine Sicherheits- oder Eignungsaussage.",
 };
