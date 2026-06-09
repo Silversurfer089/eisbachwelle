@@ -24,7 +24,8 @@ const METRICS = {
 };
 
 const VOTE_STATUSES = ["good", "okay", "poor", "closed"];
-const VOTE_WINDOW_MS = 6 * 60 * 60 * 1000;   // 6 h
+const VOTE_WINDOW_MS = 4 * 60 * 60 * 1000;   // 4 h
+const MIN_VOTES      = 2;                      // Mindestmeldungen für Status-Anzeige
 const COOLDOWN_MS    = 60 * 60 * 1000;         // 1 Stimme/IP/h
 const MAX_VOTES      = 200;
 
@@ -126,7 +127,7 @@ async function handleStatus(env) {
     const counts = { good: 0, okay: 0, poor: 0, closed: 0 };
     for (const v of recent) counts[v.s] = (counts[v.s] ?? 0) + 1;
     const total = recent.length;
-    const dominant = total > 0
+    const dominant = total >= MIN_VOTES
       ? Object.entries(counts).sort((a, b) => b[1] - a[1])[0][0]
       : null;
     const lastVoteAt = total > 0

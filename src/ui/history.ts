@@ -22,12 +22,43 @@ const METRIC_COLOR_VAR: Record<MetricKey, string> = {
   airTemp: "--neutral",
 };
 
-// Milde Glättung NUR für die Chart-Linie (gleitender Mittelwert, zentriert).
-// Ø/min/max werden weiterhin aus den Rohwerten berechnet – keine Datenverfälschung.
-// Halbfenster je Zeitraum: 24h → 1 (3 Punkte = 45 Min), 7d → 4 (9 Punkte = ~2 h).
-// GKD-Daten kommen in 15-Min-Auflösung; ohne ausreichende Glättung bleiben
-// Abfluss/Wasserstand-Kurven trotz tension=0.45 sichtbar zackig.
-const SMOOTH_W: Record<RangeMode, number> = { "24h": 1, "7d": 4, "30d": 5 };
+// Kurvenaufbereitung NUR für die Chart-Linie.
+// Ø/min/max werden aus den Rohwerten berechnet – keine Datenverfälschung.
+//
+// Strategie:
+//   24h → leichte Glättung (w=1, 3 Punkte à 15 Min = 45 Min)
+//   7d  → Downsampling auf 2h-Durchschnitte, dann w=4 (9 × 2h = 18h-Fenster)
+//
+// Downsampling fasst je N Messpunkte zu einem Durchschnitt zusammen; das
+// entfernt physikalisches Rauschen der 15-Min-GKD-Daten ohne den Trend zu
+// verfälschen und reduziert die Punktzahl von ~672 auf ~84 (7 d).
+
+const BUCKET_MS: Record<RangeMode, number> = {
+  "24h": 0,                    // kein Downsampling
+  "7d": 2 * 60 * 60_000,       // 2h-Buckets (~84 Punkte statt 672)
+  "30d": 2 * 60 * 60_000,      // 2h-Buckets (Fallback, Tab nicht mehr angezeigt)
+};
+const SMOOTH_W: Record<RangeMode, number> = { "24h": 1, "7d": 4, "30d": 4 };
+
+function downsample(
+  pts: { x: number; y: number }[],
+  bucketMs: number,
+): { x: number; y: number }[] {
+  if (bucketMs === 0 || pts.length === 0) return pts;
+  const buckets = new Map<number, number[]>();
+  for (const p of pts) {
+    const key = Math.floor(p.x / bucketMs) * bucketMs;
+    const arr = buckets.get(key) ?? [];
+    arr.push(p.y);
+    buckets.set(key, arr);
+  }
+  return [...buckets.entries()]
+    .sort(([a], [b]) => a - b)
+    .map(([x, ys]) => ({
+      x: x + bucketMs / 2,
+      y: ys.reduce((a, b) => a + b, 0) / ys.length,
+    }));
+}
 
 function smooth(
   pts: { x: number; y: number }[],
@@ -180,8 +211,12 @@ export function createHistorySection(): HistorySection {
 
     if (!hasData) return;
     const color = cssVar(METRIC_COLOR_VAR[selMetric], "#2dd4bf");
+    const chartPts = smooth(
+      downsample(points, BUCKET_MS[selRange]),
+      selRange,
+    );
     void withChart((c) =>
-      c.update(smooth(points, selRange), color, selRange, METRIC_UNIT[selMetric]),
+      c.update(chartPts, color, selRange, METRIC_UNIT[selMetric]),
     );
   }
 

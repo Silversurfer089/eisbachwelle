@@ -577,10 +577,16 @@ body {
   min-height: 1.5rem;
 }
 
-.community__status-icon {
-  font-size: 1.1rem;
-  line-height: 1;
+.community__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
+.community__dot--good   { background: #4ade80; }
+.community__dot--okay   { background: #fbbf24; }
+.community__dot--poor   { background: #f87171; }
+.community__dot--closed { background: #fb923c; }
 
 .community__status-text {
   font-weight: 700;
@@ -628,10 +634,10 @@ body {
   cursor: default;
 }
 
-.community__vote-btn--good:hover:not(:disabled)   { border-color: #4ade80; }
-.community__vote-btn--okay:hover:not(:disabled)   { border-color: #fbbf24; }
-.community__vote-btn--poor:hover:not(:disabled)   { border-color: #f87171; }
-.community__vote-btn--closed:hover:not(:disabled) { border-color: #fb923c; }
+.community__vote-btn--good:hover:not(:disabled)   { border-color: #4ade80; color: #4ade80; }
+.community__vote-btn--okay:hover:not(:disabled)   { border-color: #fbbf24; color: #fbbf24; }
+.community__vote-btn--poor:hover:not(:disabled)   { border-color: #f87171; color: #f87171; }
+.community__vote-btn--closed:hover:not(:disabled) { border-color: #fb923c; color: #fb923c; }
 
 .community__feedback {
   font-size: 0.85rem;

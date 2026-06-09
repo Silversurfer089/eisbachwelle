@@ -1,5 +1,5 @@
 import { t } from "../i18n";
-import type { CommunityStatus, VoteStatus } from "../data/model";
+import type { CommunityStatus } from "../data/model";
 import { VOTE_STATUSES } from "../data/model";
 import { loadCommunityStatus, submitVote } from "../data/source";
 import { el } from "./dom";
@@ -9,12 +9,7 @@ import { formatRelative } from "./format";
 // Wird nur angezeigt wenn VITE_LIVE_URL gesetzt ist (Worker konfiguriert).
 // Hat keine Geschäftslogik: Präsentation + Event-Handling, sonst nichts.
 
-const STATUS_ICON: Record<VoteStatus, string> = {
-  good: "🟢",
-  okay: "🟡",
-  poor: "🔴",
-  closed: "🚧",
-};
+// Keine Emojis – CSS-Farbpunkte passen besser zum sachlichen Design der App.
 
 // LocalStorage-Key für Cooldown-Tracking (kein Login nötig).
 const LS_KEY = "eisbach_last_vote";
@@ -41,9 +36,7 @@ function statusRow(cs: CommunityStatus, now: Date): HTMLElement {
 
   if (cs.status && cs.total > 0) {
     children.push(
-      el("span", { class: "community__status-icon" }, [
-        STATUS_ICON[cs.status],
-      ]),
+      el("span", { class: `community__dot community__dot--${cs.status}` }, []),
       el("span", { class: "community__status-text" }, [
         c.status[cs.status],
       ]),
@@ -102,7 +95,7 @@ export function createCommunitySection(): CommunitySection {
           "aria-label": t.community.status[s],
           ...(off ? { disabled: "" } : {}),
         },
-        [`${STATUS_ICON[s]} ${t.community.status[s]}`],
+        [t.community.status[s]],
       );
       if (!off) {
         btn.addEventListener("click", () => {
