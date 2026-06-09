@@ -25,20 +25,23 @@ const METRIC_COLOR_VAR: Record<MetricKey, string> = {
 // Kurvenaufbereitung NUR für die Chart-Linie.
 // Ø/min/max werden aus den Rohwerten berechnet – keine Datenverfälschung.
 //
-// Strategie:
-//   24h → Glättung (w=2, 5 Punkte à 15 Min = 75 Min Fenster)
-//   7d  → Downsampling auf 2h-Durchschnitte, dann w=4 (9 × 2h = 18h-Fenster)
+// Warum Ecken entstehen und wie wir sie beseitigen:
+//   GKD liefert 15-Min-Werte. Bei 96 Punkten in 24h und ~500px Chartbreite
+//   liegen Punkte nur 5px auseinander – kubische Interpolation hat keinen
+//   visuellen Raum, weiche Kurven zu zeichnen; das Auge sieht Ecken.
+//   Lösung: Downsampling auf deutlich weniger Punkte (Stundenbuckets),
+//   dann kubische Monoton-Interpolation (Chart.js) für eckenfreie Kurven.
+//   Anschließend glättet ein schmales Moving-Average noch Restoszillationen.
 //
-// Downsampling fasst je N Messpunkte zu einem Durchschnitt zusammen; das
-// entfernt physikalisches Rauschen der 15-Min-GKD-Daten ohne den Trend zu
-// verfälschen und reduziert die Punktzahl von ~672 auf ~84 (7 d).
+//   24h → 1h-Buckets → ~24 Punkte  + w=1 (3-Pkt-MA)
+//   7d  → 4h-Buckets → ~42 Punkte  + w=2 (5-Pkt-MA)
 
 const BUCKET_MS: Record<RangeMode, number> = {
-  "24h": 0,                    // kein Downsampling
-  "7d": 2 * 60 * 60_000,       // 2h-Buckets (~84 Punkte statt 672)
-  "30d": 2 * 60 * 60_000,      // 2h-Buckets (Fallback, Tab nicht mehr angezeigt)
+  "24h": 60 * 60_000,           // 1h-Buckets  (~24 Punkte statt 96)
+  "7d":  4 * 60 * 60_000,       // 4h-Buckets  (~42 Punkte statt 672)
+  "30d": 4 * 60 * 60_000,       // 4h-Buckets  (Fallback, Tab nicht mehr angezeigt)
 };
-const SMOOTH_W: Record<RangeMode, number> = { "24h": 2, "7d": 4, "30d": 4 };
+const SMOOTH_W: Record<RangeMode, number> = { "24h": 1, "7d": 2, "30d": 2 };
 
 function downsample(
   pts: { x: number; y: number }[],
