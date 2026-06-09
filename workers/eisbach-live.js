@@ -23,16 +23,32 @@ const ROW =
   /<td[^>]*>\s*(\d{2}\.\d{2}\.\d{4}\s+\d{1,2}:\d{2})\s*<\/td>\s*<td[^>]*>\s*([^<]*?)\s*<\/td>/g;
 
 function toIsoUtc(de) {
-  // "DD.MM.YYYY HH:MM" (Europe/Berlin) -> ISO UTC. Sommerzeit (MESZ) = UTC+2, sonst +1.
+  // "DD.MM.YYYY HH:MM" (Europe/Berlin) -> ISO UTC.
+  // Statt eines monatsscharfen DST-Tests prüfen wir per Intl, welcher Offset
+  // (UTC+2 MESZ oder UTC+1 MEZ) den UTC-Kandidaten korrekt auf die lokale Zeit
+  // zurück-formatiert. Damit stimmt die Umrechnung auch für die Übergangstage im
+  // März und Oktober exakt – nicht nur monatsweise.
   const m = de.match(/(\d{2})\.(\d{2})\.(\d{4})\s+(\d{1,2}):(\d{2})/);
   if (!m) return null;
-  const [, d, mo, y, h, mi] = m.map(Number);
-  // grober DST-Test (letzter So März – letzter So Okt)
-  const dst = mo > 3 && mo < 10 ? true : mo === 3 || mo === 10 ? true : false;
-  const off = dst ? 2 : 1;
-  return new Date(Date.UTC(y, mo - 1, d, h - off, mi))
-    .toISOString()
-    .replace(/\.\d{3}Z$/, "Z");
+  const d = Number(m[1]), mo = Number(m[2]) - 1, y = Number(m[3]);
+  const h = Number(m[4]), mi = Number(m[5]);
+  const fmt = new Intl.DateTimeFormat("en-u-hc-h23", {
+    timeZone: "Europe/Berlin",
+    year: "numeric", month: "2-digit", day: "2-digit",
+    hour: "2-digit", minute: "2-digit",
+  });
+  for (const off of [2, 1]) {
+    const utc = new Date(Date.UTC(y, mo, d, h - off, mi));
+    const p = Object.fromEntries(fmt.formatToParts(utc).map(x => [x.type, x.value]));
+    if (
+      Number(p.year) === y && Number(p.month) === mo + 1 && Number(p.day) === d &&
+      Number(p.hour) === h && Number(p.minute) === mi
+    ) {
+      return utc.toISOString().replace(/\.\d{3}Z$/, "Z");
+    }
+  }
+  // Fallback (sollte nicht eintreten): UTC+1
+  return new Date(Date.UTC(y, mo, d, h - 1, mi)).toISOString().replace(/\.\d{3}Z$/, "Z");
 }
 
 async function newest(thema) {
