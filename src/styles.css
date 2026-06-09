@@ -277,6 +277,8 @@ body {
 
 .card__time {
   margin: auto 0 0;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
   color: var(--text-faint);
   font-size: 0.82rem;
 }
@@ -534,13 +536,15 @@ body {
 
 .gauge__marker {
   position: absolute;
-  top: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--text);
-  border: 3px solid var(--water);
-  transform: translate(-50%, -50%);
+  top: -5px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 8px solid var(--water);
+  background: transparent;
+  border-radius: 0;
+  transform: translateX(-50%);
 }
 
 .context__range,

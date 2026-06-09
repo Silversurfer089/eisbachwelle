@@ -55,13 +55,43 @@ export interface LineChart {
     color: string,
     mode: RangeMode,
     unit: string,
+    midnights?: number[],
   ): void;
   destroy(): void;
 }
 
-export function createLineChart(canvas: HTMLCanvasElement): LineChart {
+export function createLineChart(
+  canvas: HTMLCanvasElement,
+  nowLabel: string,
+): LineChart {
   let mode: RangeMode = "24h";
   let unit = "";
+  let midnights: number[] = [];
+
+  // Inline-Plugin: gestrichelte Mitternachtslinien ohne externe Dependency.
+  const midnightPlugin = {
+    id: "midnightLines",
+    afterDraw(ch: Chart) {
+      if (!midnights.length) return;
+      const xScale = ch.scales["x"];
+      const yScale = ch.scales["y"];
+      if (!xScale || !yScale) return;
+      const ctx = ch.ctx;
+      ctx.save();
+      ctx.strokeStyle = "rgba(127,145,155,0.35)";
+      ctx.lineWidth = 1;
+      ctx.setLineDash([4, 4]);
+      for (const ms of midnights) {
+        const x = xScale.getPixelForValue(ms);
+        if (x < xScale.left || x > xScale.right) continue;
+        ctx.beginPath();
+        ctx.moveTo(x, yScale.top);
+        ctx.lineTo(x, yScale.bottom);
+        ctx.stroke();
+      }
+      ctx.restore();
+    },
+  };
 
   const config: ChartConfiguration<"line"> = {
     type: "line",
@@ -92,12 +122,21 @@ export function createLineChart(canvas: HTMLCanvasElement): LineChart {
             color: cssVar("--text-faint") || "#6f818b",
             maxRotation: 0,
             autoSkipPadding: 24,
-            callback: (value) => tickLabel(Number(value), mode),
+            callback: (value, index, ticks) =>
+              index === ticks.length - 1
+                ? nowLabel
+                : tickLabel(Number(value), mode),
           },
         },
         y: {
           grid: { color: "rgba(127,145,155,0.16)" },
           ticks: { color: cssVar("--text-faint") || "#6f818b" },
+          title: {
+            display: true,
+            text: "",
+            color: cssVar("--text-faint") || "#6f818b",
+            font: { size: 11 },
+          },
         },
       },
       plugins: {
@@ -116,18 +155,23 @@ export function createLineChart(canvas: HTMLCanvasElement): LineChart {
         },
       },
     },
+    plugins: [midnightPlugin],
   };
 
   const chart = new Chart(canvas, config);
 
   return {
-    update(points, color, nextMode, nextUnit) {
+    update(points, color, nextMode, nextUnit, newMidnights) {
       mode = nextMode;
       unit = nextUnit;
+      midnights = newMidnights ?? [];
       const ds = chart.data.datasets[0]!;
       ds.data = points;
       ds.borderColor = color;
       ds.backgroundColor = hexToFill(color);
+      // Y-Achsen-Einheit aktualisieren
+      const yTitle = chart.options.scales?.["y"]?.title;
+      if (yTitle) yTitle.text = unit;
       chart.update();
     },
     destroy() {

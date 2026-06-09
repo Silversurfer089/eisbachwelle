@@ -125,7 +125,7 @@ export const en: Strings = {
   },
 
   forecast: {
-    title: "Forecast",
+    title: "Weather Forecast",
     hourlyLabel: "Hourly trend",
     curveLabel: "Temperature trend",
     now: "Now",

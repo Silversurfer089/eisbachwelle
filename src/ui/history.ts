@@ -84,6 +84,54 @@ function smooth(
   });
 }
 
+// Berechnet alle Mitternachts-Zeitstempel (Europe/Berlin, DST-sicher) im Bereich.
+// Gleicher Intl-Rundreise-Ansatz wie toIsoUtc() im Cloudflare-Worker.
+function midnightsBerlin(from: number, to: number): number[] {
+  const fmt = new Intl.DateTimeFormat("en-u-hc-h23", {
+    timeZone: "Europe/Berlin",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const result: number[] = [];
+  const seen = new Set<number>();
+  let cursor = from + 60_000; // 1 Min nach Start, um `from` selbst zu überspringen
+  while (cursor < to) {
+    const p = Object.fromEntries(
+      fmt.formatToParts(new Date(cursor)).map((x) => [x.type, x.value]),
+    );
+    const [y, mo, d] = [
+      Number(p["year"]),
+      Number(p["month"]) - 1,
+      Number(p["day"]),
+    ];
+    for (const off of [2, 1]) {
+      const candidate = new Date(Date.UTC(y, mo, d, -off, 0));
+      const cp = Object.fromEntries(
+        fmt.formatToParts(candidate).map((x) => [x.type, x.value]),
+      );
+      if (
+        Number(cp["hour"]) === 0 &&
+        Number(cp["minute"]) === 0 &&
+        Number(cp["year"]) === y &&
+        Number(cp["month"]) === mo + 1 &&
+        Number(cp["day"]) === d
+      ) {
+        const ms = candidate.getTime();
+        if (ms > from && ms < to && !seen.has(ms)) {
+          seen.add(ms);
+          result.push(ms);
+        }
+        break;
+      }
+    }
+    cursor += 24 * 60 * 60_000; // +1 Tag
+  }
+  return result.sort((a, b) => a - b);
+}
+
 function cssVar(name: string, fallback: string): string {
   const v = getComputedStyle(document.documentElement)
     .getPropertyValue(name)
@@ -218,8 +266,9 @@ export function createHistorySection(): HistorySection {
       downsample(points, BUCKET_MS[selRange]),
       selRange,
     );
+    const mids = midnightsBerlin(cutoff, Date.now());
     void withChart((c) =>
-      c.update(chartPts, color, selRange, METRIC_UNIT[selMetric]),
+      c.update(chartPts, color, selRange, METRIC_UNIT[selMetric], mids),
     );
   }
 
@@ -227,7 +276,7 @@ export function createHistorySection(): HistorySection {
     if (!chart) {
       if (!chartLoading) {
         chartLoading = import("../charts/line-chart").then((m) =>
-          m.createLineChart(canvas),
+          m.createLineChart(canvas, t.forecast.now),
         );
       }
       chart = await chartLoading;

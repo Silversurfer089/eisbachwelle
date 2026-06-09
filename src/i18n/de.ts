@@ -127,7 +127,7 @@ export const de = {
   },
 
   forecast: {
-    title: "Vorhersage",
+    title: "Wettervorhersage",
     hourlyLabel: "Stündlicher Verlauf",
     curveLabel: "Temperatur-Verlauf",
     now: "Jetzt",
