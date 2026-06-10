@@ -29,8 +29,10 @@ const MIN_VOTES = 2; // Mindestmeldungen für Status-Anzeige
 const COOLDOWN_MS = 60 * 60 * 1000; // 1 Stimme/IP/h
 const MAX_VOTES = 200;
 
+// GKD hängt seit 06/2026 " Uhr" an den Zeitstempel — optionales Suffix
+// akzeptiert altes und neues Format.
 const ROW =
-  /<td[^>]*>\s*(\d{2}\.\d{2}\.\d{4}\s+\d{1,2}:\d{2})\s*<\/td>\s*<td[^>]*>\s*([^<]*?)\s*<\/td>/g;
+  /<td[^>]*>\s*(\d{2}\.\d{2}\.\d{4}\s+\d{1,2}:\d{2})(?:\s*Uhr)?\s*<\/td>\s*<td[^>]*>\s*([^<]*?)\s*<\/td>/g;
 
 // ── Hilfsfunktionen ──────────────────────────────────────────────────────────
 

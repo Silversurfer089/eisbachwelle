@@ -136,8 +136,10 @@ def write_json(path: Path, doc: dict) -> None:
     )
 
 
+# GKD hängt seit 06/2026 " Uhr" an den Zeitstempel, HND (noch) nicht —
+# das optionale Suffix akzeptiert beide Formate.
 _ROW_RE = re.compile(
-    r"<td[^>]*>\s*(\d{2}\.\d{2}\.\d{4}\s+\d{1,2}:\d{2})\s*</td>\s*"
+    r"<td[^>]*>\s*(\d{2}\.\d{2}\.\d{4}\s+\d{1,2}:\d{2})(?:\s*Uhr)?\s*</td>\s*"
     r"<td[^>]*>\s*([^<]*?)\s*</td>",
 )
 
