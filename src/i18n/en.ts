@@ -133,6 +133,8 @@ export const en: Strings = {
     sourceNote: "Air temperature & precipitation · Open-Meteo",
     waterNote:
       "There is no reliable daily forecast for discharge or level – the channel is regulated and very stable in the short term. The water-temperature trend on the card is only a rough estimate from the air forecast.",
+    bestTime: (start: number, end: number) =>
+      `Water temperature has recently peaked around ${start}:00–${end}:00 (observed pattern, not a forecast).`,
     today: "Today",
     tomorrow: "Tomorrow",
     tempRange: (max: string, min: string) => `${max}° / ${min}°`,

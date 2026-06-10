@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Holt Eisbach-Quelldaten und schreibt normalisiertes JSON für die statische PWA.
 
-Erzeugt zwei Dateien unter ``public/data/``:
+Erzeugt drei Dateien unter ``public/data/``:
 
 * ``current.json``  – aktueller Stand je Messgröße (Abfluss, Pegel, Wasser-/Lufttemp.)
 * ``history.json``  – kompakte, ausgedünnte Zeitreihen (bis 30 Tage) je Messgröße
+* ``archive.json``  – Tages-Aggregate (min/mean/max) je Messgröße, dauerhaft
+  (Grundlage für Wochenvergleich und Wassertemperatur-Vorhersagemodell)
 
 Quellen (verifiziert, siehe DECISIONS.md, Stand 2026-06-03):
 
@@ -364,6 +366,64 @@ def load_existing_history() -> dict[str, list[Point]]:
     return out
 
 
+ARCHIVE_MIN_POINTS = 4  # weniger Messpunkte ergeben keine sinnvolle Tagesstatistik
+
+
+def load_existing_archive() -> dict[str, dict[str, dict]]:
+    path = OUT_DIR / "archive.json"
+    if not path.exists():
+        return {}
+    try:
+        series = json.loads(path.read_text(encoding="utf-8")).get("series", {})
+        if isinstance(series, dict):
+            return series
+    except (ValueError, TypeError) as exc:
+        log(f"WARNUNG: archive.json unlesbar ({exc!r}), starte leer.")
+    return {}
+
+
+def update_archive(history: dict[str, list[Point]], now: datetime) -> None:
+    """Schreibt Tages-Aggregate (Europe/Berlin) fort — wird nie ausgedünnt.
+
+    history.json verwirft Werte nach 30 Tagen; das Archiv behält pro Tag
+    min/mean/max dauerhaft (~100 Bytes/Tag je Reihe). Nur abgeschlossene Tage
+    werden geschrieben; solange ein Tag noch in der Rohhistorie liegt, wird
+    sein Eintrag bei jedem Lauf mit der vollständigeren Basis erneuert.
+    """
+    today = now.astimezone(BERLIN).date().isoformat()
+    archive = load_existing_archive()
+    for series, pts in history.items():
+        by_day: dict[str, list[float]] = {}
+        for p in pts:
+            dt = datetime.fromisoformat(p.t.replace("Z", "+00:00"))
+            day = dt.astimezone(BERLIN).date().isoformat()
+            if day >= today:
+                continue
+            by_day.setdefault(day, []).append(p.v)
+        dest = archive.setdefault(series, {})
+        for day, vs in by_day.items():
+            if len(vs) < ARCHIVE_MIN_POINTS:
+                continue
+            # Nie mit dünnerer Basis überschreiben (z. B. nach Ausdünnung der
+            # Historie) — Einträge dürfen sich nur verbessern.
+            prev = dest.get(day)
+            if isinstance(prev, dict) and prev.get("n", 0) > len(vs):
+                continue
+            dest[day] = {
+                "min": round(min(vs), 2),
+                "mean": round(sum(vs) / len(vs), 2),
+                "max": round(max(vs), 2),
+                "n": len(vs),
+            }
+    write_json(
+        OUT_DIR / "archive.json",
+        {
+            "generatedAt": to_iso_utc(now),
+            "series": {s: dict(sorted(d.items())) for s, d in archive.items()},
+        },
+    )
+
+
 def build() -> None:
     now = datetime.now(timezone.utc)
     OUT_DIR.mkdir(parents=True, exist_ok=True)
@@ -409,6 +469,9 @@ def build() -> None:
     # --- Vorhersage (Luft + Niederschlag): Tage + Stundenverlauf ---
     forecast = safe("Open-Meteo Vorhersage", fetch_forecast) or []
     forecast_hourly = safe("Open-Meteo Stunden", fetch_forecast_hourly) or []
+
+    # --- Tages-Archiv fortschreiben (vor dem Ausdünnen: volle Datenbasis) ---
+    update_archive(history, now)
 
     # --- Ausdünnen & schreiben ---
     thinned = {m: thin(pts, now) for m, pts in history.items()}

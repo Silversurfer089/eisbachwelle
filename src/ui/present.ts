@@ -5,6 +5,7 @@ import {
 } from "../data/domain/context";
 import { deltaToYesterday, type YesterdayDelta } from "../data/domain/compare";
 import { waterTendency, type WaterTendency } from "../data/domain/watertrend";
+import { warmestWaterWindow, type WarmWindow } from "../data/domain/diurnal";
 import { freshestTimestamp, isStale } from "../data/loader";
 import { METRIC_KEYS } from "../data/model";
 import type {
@@ -44,6 +45,8 @@ export interface DashboardVM {
   forecastHourly: ForecastHour[];
   /** Grobe Tendenz der Wassertemperatur (Schätzung aus der Luft-Vorhersage). */
   waterTendency: WaterTendency;
+  /** Typisches Tagesfenster der höchsten Wassertemperatur (Beobachtung), oder null. */
+  warmWindow: WarmWindow | null;
 }
 
 function average(values: number[]): number | null {
@@ -102,5 +105,6 @@ export function present(
     forecast: current.forecast,
     forecastHourly: current.forecastHourly,
     waterTendency: waterTendency(recentAir, forecastAir),
+    warmWindow: warmestWaterWindow(history.series.waterTemp, now),
   };
 }

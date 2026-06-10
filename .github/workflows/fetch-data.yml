@@ -1,7 +1,7 @@
 name: Fetch Eisbach data
 
 # Holt alle 15 Minuten die Quelldaten (HND/GKD/Open-Meteo), normalisiert sie zu JSON
-# und veröffentlicht NUR current.json + history.json im separaten `data`-Branch.
+# und veröffentlicht NUR current.json + history.json + archive.json im `data`-Branch.
 #
 # Wichtig für Kosten/Wartung: Dieser Job baut die App NICHT neu. Der `data`-Branch wird
 # als kompakter Single-Commit force-gepusht (bleibt winzig). Die laufende Historie wird
@@ -42,6 +42,7 @@ jobs:
           mkdir -p public/data
           cp data-branch/current.json public/data/ 2>/dev/null || true
           cp data-branch/history.json public/data/ 2>/dev/null || true
+          cp data-branch/archive.json public/data/ 2>/dev/null || true
 
       - name: Quellen abrufen & normalisieren
         run: python3 scripts/fetch_data.py
@@ -50,9 +51,11 @@ jobs:
         run: |
           out=$(mktemp -d)
           cp public/data/current.json public/data/history.json "$out/"
+          cp public/data/archive.json "$out/" 2>/dev/null || true
           cd "$out"
           git init -q -b data
           git add current.json history.json
+          git add archive.json 2>/dev/null || true
           git -c user.name="eisbach-bot" \
               -c user.email="bot@users.noreply.github.com" \
               commit -q -m "data: $(date -u +%Y-%m-%dT%H:%MZ)"

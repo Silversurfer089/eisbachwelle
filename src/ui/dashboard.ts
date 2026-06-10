@@ -350,6 +350,15 @@ export function renderForecast(
     el("p", { class: "forecast__waternote" }, [t.forecast.waterNote]),
   );
 
+  // Randinfo: typisches Tagesfenster der höchsten Wassertemperatur (Beobachtung).
+  if (vm.warmWindow) {
+    children.push(
+      el("p", { class: "forecast__waternote" }, [
+        t.forecast.bestTime(vm.warmWindow.startHour, vm.warmWindow.endHour),
+      ]),
+    );
+  }
+
   return el(
     "section",
     { class: "forecast", "aria-label": t.forecast.title },
