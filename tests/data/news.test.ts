@@ -20,15 +20,15 @@ describe("freshNews", () => {
     expect(freshNews([], NOW)).toEqual([]);
   });
 
-  it("filtert Einträge älter als 180 Tage", () => {
-    const out = freshNews([item(10), item(179), item(181), item(400)], NOW);
+  it("filtert Einträge älter als 30 Tage", () => {
+    const out = freshNews([item(10), item(29), item(31), item(400)], NOW);
     expect(out).toHaveLength(2);
   });
 
   it("sortiert neueste zuerst", () => {
-    const out = freshNews([item(30), item(5), item(90)], NOW);
+    const out = freshNews([item(20), item(5), item(28)], NOW);
     expect(out.map((i) => i.t)).toEqual(
-      [item(5).t, item(30).t, item(90).t].map(String),
+      [item(5).t, item(20).t, item(28).t].map(String),
     );
   });
 

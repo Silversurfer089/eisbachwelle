@@ -947,6 +947,11 @@ body {
 
 .news {
   margin-top: 28px;
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius);
+  padding: 16px 18px 18px;
+  box-shadow: var(--shadow);
 }
 
 .news__title {

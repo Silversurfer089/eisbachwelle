@@ -4,10 +4,10 @@ import type { NewsItem } from "../model";
 // "Keine Neuigkeiten = keine Neuigkeiten" — liefert diese Funktion eine leere
 // Liste, blendet die UI die Sektion komplett aus.
 
-const MAX_AGE_DAYS = 180;
+const MAX_AGE_DAYS = 30;
 const MAX_ITEMS = 6;
 
-/** Filtert auf https-Links mit gültigem, nicht-zukünftigem Datum (≤ 180 Tage),
+/** Filtert auf https-Links mit gültigem, nicht-zukünftigem Datum (≤ 30 Tage),
  *  sortiert neueste zuerst, maximal 6 Einträge. */
 export function freshNews(
   items: NewsItem[],

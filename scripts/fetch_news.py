@@ -42,7 +42,7 @@ FEEDS: list[tuple[str, str]] = [
 # Filter auf Titel + Beschreibung (Beschreibung wird NICHT gespeichert).
 KEYWORDS = ("eisbach", "surfwelle", "flusssurf", "surfen in münchen")
 
-MAX_AGE_DAYS = 180
+MAX_AGE_DAYS = 30
 MAX_ITEMS = 12
 MIN_INTERVAL_H = 20
 TIMEOUT_S = 20
