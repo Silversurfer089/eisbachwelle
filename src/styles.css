@@ -255,6 +255,12 @@ body {
   font-weight: 600;
 }
 
+.card__trend-window {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
 .trend--rising {
   color: var(--rising);
 }

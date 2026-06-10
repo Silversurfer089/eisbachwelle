@@ -21,6 +21,9 @@ export const de = {
     unknown: "keine Trendangabe",
   } satisfies Record<Trend, string>,
 
+  // Muss zum lookbackMs-Default in src/data/domain/trend.ts passen (3 h).
+  trendWindow: "3 Std.",
+
   yesterday: {
     same: "≈ wie gestern",
     delta: (signed: string) => `${signed} ggü. gestern`,
@@ -94,13 +97,15 @@ export const de = {
       mid: "Aktuell normaler Wasserstand",
       high: "Aktuell eher viel Wasser",
     },
-    trendLead: "Der Abfluss ist zuletzt",
+    trendLead: "Der Abfluss ist in den letzten 3 Stunden",
     trendUnknown: "Zum aktuellen Kurzzeit-Trend liegen zu wenige Werte vor.",
     // p = gerundeter Perzentilrang, days = abgedeckte Tage
     percentile: (p: number, daysLabel: string) =>
       `Aktuell höher als rund ${p} % der Messwerte ${daysLabel}.`,
     rangeLabel: (lo: string, hi: string) => `Bisheriger Bereich: ${lo} – ${hi}`,
     note: "Orientierung aus den bisher erfassten Daten – kein Qualitäts-, Eignungs- oder Sicherheitsurteil.",
+    waveNote:
+      "Ob die Welle damit gut läuft, zeigen die Messwerte allein nicht – den besten Anhaltspunkt gibt der Community-Status.",
     building:
       "Die Datenbasis wächst noch; die Einordnung wird mit der Zeit aussagekräftiger.",
     insufficient:

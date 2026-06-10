@@ -20,6 +20,9 @@ export const en: Strings = {
     unknown: "no trend",
   },
 
+  // Must match the lookbackMs default in src/data/domain/trend.ts (3 h).
+  trendWindow: "3 hrs",
+
   yesterday: {
     same: "≈ same as yesterday",
     delta: (signed: string) => `${signed} vs. yesterday`,
@@ -94,8 +97,10 @@ export const en: Strings = {
       mid: "Currently a normal level",
       high: "Currently rather a lot of water",
     },
-    trendLead: "Discharge has recently been",
+    trendLead: "Over the last 3 hours, discharge has been",
     trendUnknown: "Too few values for a short-term trend right now.",
+    waveNote:
+      "The readings alone don't tell you whether the wave rides well – the community status is the best indicator.",
     percentile: (p: number, daysLabel: string) =>
       `Currently higher than about ${p}% of readings ${daysLabel}.`,
     rangeLabel: (lo: string, hi: string) => `Range so far: ${lo} – ${hi}`,

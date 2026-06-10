@@ -79,7 +79,10 @@ export function renderContextPanel(vm: DashboardVM): HTMLElement {
     );
   }
 
-  children.push(el("p", { class: "context__note" }, [t.context.note]));
+  children.push(
+    el("p", { class: "context__note" }, [t.context.waveNote]),
+    el("p", { class: "context__note" }, [t.context.note]),
+  );
 
   return el(
     "section",

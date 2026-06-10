@@ -140,6 +140,14 @@ function metricCard(
       el("p", { class: `card__trend trend--${m.trend}` }, [
         svgIcon(trendIcon(m.trend)),
         el("span", {}, [trendText]),
+        // Zeitfenster des Trends sichtbar machen ("stabil" allein sagt nichts).
+        ...(m.trend !== "unknown"
+          ? [
+              el("span", { class: "card__trend-window" }, [
+                `· ${t.trendWindow}`,
+              ]),
+            ]
+          : []),
       ]),
     );
 
