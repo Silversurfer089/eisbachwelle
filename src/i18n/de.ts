@@ -161,6 +161,29 @@ export const de = {
     note: "Automatisch gesammelt aus offiziellen und Community-Quellen – Links führen zur Originalquelle.",
   },
 
+  anatomy: {
+    summary: "Wie die Welle entsteht",
+    diagramLabel: "Schematischer Längsschnitt der Eisbachwelle",
+    flowDirection: "Fließrichtung",
+    intro:
+      "Unter der Prinzregentenstraße tritt der Eisbach aus zwei Zuläufen hervor und schießt über eine Steinstufe: Das Wasser ist dort schnell und flach. Wo es auf das tiefere, langsame Wasser dahinter trifft, klappt die Strömung schlagartig um – ein Wechselsprung. An der Oberfläche rollt das Wasser gegen die Fließrichtung zurück: die stehende Welle, auf der gesurft wird.",
+    legend: [
+      "Auslass unter der Prinzregentenstraße: Zwei Zuläufe speisen die Welle – wie sich das Wasser auf sie verteilt, prägt die Wellenform.",
+      "Steinstufe: Über die abfallende Sohle beschleunigt das Wasser („schießender“ Abfluss – schnell und flach).",
+      "Kiesbank: Sediment auf der Sohle stützt die Welle. Fehlt es – wie nach der Bachauskehr im Oktober 2025 –, bricht die Welle zusammen; heute hilft grober Kies nach.",
+      "Stehende Welle (Wechselsprung): rund ein halber Meter hoch; an der Oberfläche rollt die Deckwalze gegen die Strömung.",
+      "Störsteine (1970er Jahre): Betonblöcke am Grund nehmen dem Wasser Energie und beruhigen die Strömung.",
+      "Unterwasser: Dahinter fließt der Bach tief und langsam („strömend“) – auch dieser Wasserstand wirkt auf die Wellenform zurück.",
+    ],
+    historyTitle: "Bachauskehr & jüngere Geschichte",
+    history1:
+      "Bei der jährlichen Bachauskehr wird der Bach für Reinigung und Wartung trockengelegt. Nach der Bachauskehr im Oktober 2025 baute sich die Welle nicht wieder auf – vermutlich war zu viel Sediment entnommen worden.",
+    history2:
+      "Früher stabilisierten Surfer die Welle mit Holzbrettern an Seilen (zeitweise auch einer Metallschiene); ab etwa 2005 übernahm das natürliche Sediment. Seit dem 8. Mai 2026 ist das Surfen wieder freigegeben; die Stadt stabilisiert die Sohle mit grobem Kies, und an der Hochschule München wird an einer dauerhaft stabilen Wellenstruktur geforscht.",
+    disclaimer:
+      "Schematische Darstellung, nicht maßstäblich. Zusammengestellt aus öffentlichen Quellen (Stand: Juni 2026):",
+  },
+
   community: {
     title: "Community-Status",
     noVotes: "Noch keine Meldungen",

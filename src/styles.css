@@ -1001,6 +1001,130 @@ body {
   font-style: italic;
 }
 
+/* --- Wellen-Anatomie (Wie die Welle entsteht) --- */
+
+.wv-wrap {
+  margin: 14px 0 6px;
+}
+
+.wv {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.wv__ground {
+  fill: rgba(127, 145, 155, 0.22);
+}
+
+.wv__water {
+  fill: var(--water);
+  opacity: 0.24;
+}
+
+.wv__surface {
+  fill: none;
+  stroke: var(--water);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.wv__gravel {
+  fill: rgba(193, 160, 102, 0.6);
+}
+
+.wv__grit {
+  fill: rgba(120, 95, 50, 0.5);
+}
+
+.wv__bridge {
+  fill: rgba(127, 145, 155, 0.45);
+}
+
+.wv__tunnel {
+  fill: rgba(40, 52, 60, 0.8);
+}
+
+.wv__block {
+  fill: rgba(95, 110, 120, 0.75);
+}
+
+.wv__curl {
+  fill: none;
+  stroke: var(--water);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+}
+
+.wv__foam {
+  fill: rgba(255, 255, 255, 0.75);
+}
+
+.wv__arrow {
+  stroke: rgba(110, 125, 135, 0.9);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+#wvAh path {
+  fill: rgba(110, 125, 135, 0.9);
+}
+
+.wv__label {
+  fill: var(--text-faint);
+  font-size: 13px;
+}
+
+.wv__marker {
+  fill: var(--water);
+}
+
+.wv__marker-num {
+  fill: #fff;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.wv-legend {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: wv;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wv-legend li {
+  counter-increment: wv;
+  position: relative;
+  padding-left: 30px;
+  font-size: 0.88rem;
+}
+
+.wv-legend li::before {
+  content: counter(wv);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--water);
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wv-disclaimer {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
 /* --- Fuß --- */
 
 .app-footer {

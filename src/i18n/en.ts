@@ -160,6 +160,29 @@ export const en: Strings = {
     note: "Collected automatically from official and community sources – links go to the original source.",
   },
 
+  anatomy: {
+    summary: "How the wave forms",
+    diagramLabel: "Schematic longitudinal section of the Eisbach wave",
+    flowDirection: "Flow direction",
+    intro:
+      "Below Prinzregentenstraße the Eisbach emerges from two outlets and shoots over a stone step: the water there is fast and shallow. Where it meets the deeper, slower water beyond, the flow flips abruptly – a hydraulic jump. At the surface the water rolls back against the current: the standing wave that people surf.",
+    legend: [
+      "Outlet below Prinzregentenstraße: two inflows feed the wave – how the water is split between them shapes the wave.",
+      "Stone step: the water accelerates down the sloping bed (supercritical flow – fast and shallow).",
+      "Gravel bank: sediment on the bed supports the wave. When it is missing – as after the canal cleanout in October 2025 – the wave collapses; today coarse gravel helps out.",
+      "Standing wave (hydraulic jump): roughly half a metre high; at the surface the roller turns back against the current.",
+      "Baffle blocks (1970s): concrete blocks on the bed take energy out of the water and calm the flow.",
+      "Tailwater: beyond the wave the stream runs deep and slow (subcritical) – this water level also feeds back into the wave's shape.",
+    ],
+    historyTitle: "Canal cleanout & recent history",
+    history1:
+      "For the annual “Bachauskehr” the stream is drained for cleaning and maintenance. After the cleanout in October 2025 the wave did not rebuild – presumably too much sediment had been removed.",
+    history2:
+      "Surfers used to stabilise the wave with wooden planks on ropes (and at times a metal rail); from around 2005 natural sediment took over. Surfing has been permitted again since 8 May 2026; the city is stabilising the bed with coarse gravel, and Munich University of Applied Sciences is researching a permanently stable wave structure.",
+    disclaimer:
+      "Schematic illustration, not to scale. Compiled from public sources (as of June 2026):",
+  },
+
   community: {
     title: "Community status",
     noVotes: "No reports yet",

@@ -15,6 +15,7 @@ import {
   renderAbout,
 } from "./ui/dashboard";
 import { renderContextPanel } from "./ui/context-panel";
+import { renderWaveAnatomy } from "./ui/wave-anatomy";
 import { createHistorySection, type HistorySection } from "./ui/history";
 import { createCommunitySection, type CommunitySection } from "./ui/community";
 import { createNewsSection, type NewsSection } from "./ui/news";
@@ -101,6 +102,7 @@ function ensureShell(root: HTMLElement): void {
       forecastSlot,
       historySection.element,
       newsSection.element,
+      renderWaveAnatomy(),
       renderAbout(),
       renderFooter(),
     ]),
