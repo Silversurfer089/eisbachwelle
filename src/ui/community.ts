@@ -27,7 +27,9 @@ function canVote(): boolean {
 function markVoted(): void {
   try {
     localStorage.setItem(LS_KEY, String(Date.now()));
-  } catch {}
+  } catch {
+    // localStorage nicht verfügbar (z. B. Private Mode) → Cooldown entfällt
+  }
 }
 
 function statusRow(cs: CommunityStatus, now: Date): HTMLElement {
