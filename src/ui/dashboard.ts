@@ -421,7 +421,10 @@ export function renderAbout(): HTMLElement {
       el("p", {}, [a.method]),
 
       el("p", {}, [
-        extLink(import.meta.env.VITE_REPO_URL ?? a.repoUrl, `${a.sourceCode} ↗`),
+        extLink(
+          import.meta.env.VITE_REPO_URL ?? a.repoUrl,
+          `${a.sourceCode} ↗`,
+        ),
       ]),
     ]),
   ]);

@@ -32,7 +32,10 @@ async function fetchJson(name: string, signal?: AbortSignal): Promise<unknown> {
  * Wasser-Aktuellwerte bei jedem Laden frisch geholt und – falls neuer – über die Cron-Werte
  * gelegt. Historie/Vorhersage bleiben aus dem Cron. Fällt der Worker aus, zählt der Cron-Stand.
  */
-async function applyLive(base: CurrentData, signal?: AbortSignal): Promise<void> {
+async function applyLive(
+  base: CurrentData,
+  signal?: AbortSignal,
+): Promise<void> {
   const url = import.meta.env.VITE_LIVE_URL;
   if (!url) return;
   try {
@@ -90,15 +93,17 @@ export async function loadCommunityStatus(
     const d = (await res.json()) as Record<string, unknown>;
     const counts = {} as Record<VoteStatus, number>;
     for (const s of VOTE_STATUSES)
-      counts[s] = typeof d.counts === "object" && d.counts !== null
-        ? Number((d.counts as Record<string, unknown>)[s] ?? 0)
-        : 0;
+      counts[s] =
+        typeof d.counts === "object" && d.counts !== null
+          ? Number((d.counts as Record<string, unknown>)[s] ?? 0)
+          : 0;
     const total = typeof d.total === "number" ? d.total : 0;
-    const raw = typeof d.status === "string" && VOTE_STATUSES.includes(d.status as VoteStatus)
-      ? (d.status as VoteStatus)
-      : null;
-    const lastVoteAt =
-      typeof d.lastVoteAt === "string" ? d.lastVoteAt : null;
+    const raw =
+      typeof d.status === "string" &&
+      VOTE_STATUSES.includes(d.status as VoteStatus)
+        ? (d.status as VoteStatus)
+        : null;
+    const lastVoteAt = typeof d.lastVoteAt === "string" ? d.lastVoteAt : null;
     return { status: total > 0 ? raw : null, counts, total, lastVoteAt };
   } catch {
     return null;

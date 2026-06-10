@@ -55,7 +55,8 @@ export const en: Strings = {
     summary: "About & sources",
     what: "Non-commercial community project for the Eisbach wave. No tracking, no ads, no accounts.",
     sourcesTitle: "Data sources",
-    sourceLfu: "Bavarian State Office for the Environment (LfU) – licence CC BY 4.0",
+    sourceLfu:
+      "Bavarian State Office for the Environment (LfU) – licence CC BY 4.0",
     sourceHnd: "Bavarian Flood Information Service (HND)",
     sourceGkd: "Bavarian Hydrological Service (GKD)",
     sourceMeteo: "Open-Meteo (weather)",

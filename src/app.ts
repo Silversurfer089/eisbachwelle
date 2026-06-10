@@ -9,10 +9,7 @@ import {
 } from "./ui/dashboard";
 import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
-import {
-  createCommunitySection,
-  type CommunitySection,
-} from "./ui/community";
+import { createCommunitySection, type CommunitySection } from "./ui/community";
 import { el } from "./ui/dom";
 import { t, onLangChange } from "./i18n";
 

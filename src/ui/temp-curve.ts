@@ -176,13 +176,21 @@ export function renderTempCurve(
     tooltip.hidden = false;
   }
 
-  svgEl.addEventListener("mousemove", (e) => { showAt(e.clientX); });
+  svgEl.addEventListener("mousemove", (e) => {
+    showAt(e.clientX);
+  });
   svgEl.addEventListener(
     "touchmove",
-    (e) => { e.preventDefault(); showAt(e.touches[0]!.clientX); },
+    (e) => {
+      e.preventDefault();
+      showAt(e.touches[0]!.clientX);
+    },
     { passive: false },
   );
-  const hide = () => { crosshair.hidden = true; tooltip.hidden = true; };
+  const hide = () => {
+    crosshair.hidden = true;
+    tooltip.hidden = true;
+  };
   svgEl.addEventListener("mouseleave", hide);
   svgEl.addEventListener("touchend", hide);
 

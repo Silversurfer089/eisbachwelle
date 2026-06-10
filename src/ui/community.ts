@@ -39,12 +39,8 @@ function statusRow(cs: CommunityStatus, now: Date): HTMLElement {
   if (cs.status && cs.total > 0) {
     children.push(
       el("span", { class: `community__dot community__dot--${cs.status}` }, []),
-      el("span", { class: "community__status-text" }, [
-        c.status[cs.status],
-      ]),
-      el("span", { class: "community__meta" }, [
-        `· ${c.voteCount(cs.total)}`,
-      ]),
+      el("span", { class: "community__status-text" }, [c.status[cs.status]]),
+      el("span", { class: "community__meta" }, [`· ${c.voteCount(cs.total)}`]),
     );
     if (cs.lastVoteAt) {
       children.push(
@@ -69,12 +65,16 @@ export function createCommunitySection(): CommunitySection {
   const body = el("div", { class: "community__body" });
   const feedback = el("p", { class: "community__feedback", hidden: "" });
 
-  const element = el("section", { class: "community", "aria-label": t.community.title }, [
-    el("h2", { class: "community__title" }, [t.community.title]),
-    body,
-    feedback,
-    el("p", { class: "community__disclaimer" }, [t.community.disclaimer]),
-  ]);
+  const element = el(
+    "section",
+    { class: "community", "aria-label": t.community.title },
+    [
+      el("h2", { class: "community__title" }, [t.community.title]),
+      body,
+      feedback,
+      el("p", { class: "community__disclaimer" }, [t.community.disclaimer]),
+    ],
+  );
 
   function showFeedback(msg: string, ok: boolean): void {
     feedback.textContent = msg;
@@ -103,9 +103,9 @@ export function createCommunitySection(): CommunitySection {
         btn.addEventListener("click", () => {
           void (async () => {
             // Alle Buttons sofort deaktivieren → kein Doppelklick.
-            wrap.querySelectorAll("button").forEach((b) =>
-              b.setAttribute("disabled", ""),
-            );
+            wrap
+              .querySelectorAll("button")
+              .forEach((b) => b.setAttribute("disabled", ""));
             const result = await submitVote(s);
             if (result === "ok") {
               markVoted();
@@ -118,9 +118,9 @@ export function createCommunitySection(): CommunitySection {
             } else {
               showFeedback(t.community.error, false);
               // Buttons wieder freischalten bei Fehler.
-              wrap.querySelectorAll("button").forEach((b) =>
-                b.removeAttribute("disabled"),
-              );
+              wrap
+                .querySelectorAll("button")
+                .forEach((b) => b.removeAttribute("disabled"));
             }
           })();
         });

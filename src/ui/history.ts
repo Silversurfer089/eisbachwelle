@@ -37,9 +37,9 @@ const METRIC_COLOR_VAR: Record<MetricKey, string> = {
 //   7d  → 4h-Buckets → ~42 Punkte  + w=2 (5-Pkt-MA)
 
 const BUCKET_MS: Record<RangeMode, number> = {
-  "24h": 60 * 60_000,           // 1h-Buckets  (~24 Punkte statt 96)
-  "7d":  4 * 60 * 60_000,       // 4h-Buckets  (~42 Punkte statt 672)
-  "30d": 4 * 60 * 60_000,       // 4h-Buckets  (Fallback, Tab nicht mehr angezeigt)
+  "24h": 60 * 60_000, // 1h-Buckets  (~24 Punkte statt 96)
+  "7d": 4 * 60 * 60_000, // 4h-Buckets  (~42 Punkte statt 672)
+  "30d": 4 * 60 * 60_000, // 4h-Buckets  (Fallback, Tab nicht mehr angezeigt)
 };
 const SMOOTH_W: Record<RangeMode, number> = { "24h": 1, "7d": 2, "30d": 2 };
 
@@ -268,10 +268,7 @@ export function createHistorySection(): HistorySection {
 
     if (!hasData) return;
     const color = cssVar(METRIC_COLOR_VAR[selMetric], "#2dd4bf");
-    const chartPts = smooth(
-      downsample(points, BUCKET_MS[selRange]),
-      selRange,
-    );
+    const chartPts = smooth(downsample(points, BUCKET_MS[selRange]), selRange);
     const mids = midnightsBerlin(cutoff, Date.now());
     void withChart((c) =>
       c.update(chartPts, color, selRange, METRIC_UNIT[selMetric], mids),
