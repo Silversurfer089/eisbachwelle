@@ -93,6 +93,17 @@ export function renderTempCurve(
     );
   };
 
+  // Mitternachts-Akzent: gestrichelte Linie bei 00:00 Berlin (gleicher Stil
+  // wie die Tagestrennlinien der Verlaufs-Charts). Stundenraster → hour === 0.
+  const midLines = data
+    .map((d, i) => ({ i, hour: Number(berlinHour.format(d.ms)) }))
+    .filter(({ i, hour }) => i > 0 && hour === 0)
+    .map(
+      ({ i }) =>
+        `<line class="tc__mid" x1="${r(xAt(i))}" y1="${PAD.t}" x2="${r(xAt(i))}" y2="${H - PAD.b}"/>`,
+    )
+    .join("");
+
   // X-Achsen-Labels an gleichmäßigen Positionen.
   const tickIdx = [0, 0.25, 0.5, 0.75, 1].map((f) =>
     Math.round(f * (data.length - 1)),
@@ -108,6 +119,7 @@ export function renderTempCurve(
   const svg =
     `<svg class="tempcurve" viewBox="0 0 ${W} ${H}" role="img" ` +
     `aria-label="${t.forecast.curveLabel}, ${Math.round(data[0]!.v)}° – ${Math.round(hi)}°">` +
+    midLines +
     `<path class="tc__area" d="${area}"/>` +
     `<path class="tc__line" d="${line}"/>` +
     marker(maxIdx) +

@@ -357,6 +357,12 @@ body {
   height: auto;
 }
 
+.tc__mid {
+  stroke: rgba(127, 145, 155, 0.35);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
 .tc__line {
   fill: none;
   stroke: var(--water);
