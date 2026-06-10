@@ -43,19 +43,28 @@ jobs:
           cp data-branch/current.json public/data/ 2>/dev/null || true
           cp data-branch/history.json public/data/ 2>/dev/null || true
           cp data-branch/archive.json public/data/ 2>/dev/null || true
+          cp data-branch/news.json public/data/ 2>/dev/null || true
 
       - name: Quellen abrufen & normalisieren
         run: python3 scripts/fetch_data.py
+
+      # News-Feeds prüfen — das Skript drosselt sich selbst auf ~1× täglich
+      # (überspringt, wenn news.json jünger als 20 h ist).
+      - name: News-Feeds prüfen
+        run: python3 scripts/fetch_news.py
+        continue-on-error: true
 
       - name: In data-Branch veröffentlichen
         run: |
           out=$(mktemp -d)
           cp public/data/current.json public/data/history.json "$out/"
           cp public/data/archive.json "$out/" 2>/dev/null || true
+          cp public/data/news.json "$out/" 2>/dev/null || true
           cd "$out"
           git init -q -b data
           git add current.json history.json
           git add archive.json 2>/dev/null || true
+          git add news.json 2>/dev/null || true
           git -c user.name="eisbach-bot" \
               -c user.email="bot@users.noreply.github.com" \
               commit -q -m "data: $(date -u +%Y-%m-%dT%H:%MZ)"

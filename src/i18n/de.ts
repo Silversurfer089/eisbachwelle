@@ -156,6 +156,11 @@ export const de = {
     },
   },
 
+  news: {
+    title: "Neuigkeiten",
+    note: "Automatisch gesammelt aus offiziellen und Community-Quellen – Links führen zur Originalquelle.",
+  },
+
   community: {
     title: "Community-Status",
     noVotes: "Noch keine Meldungen",

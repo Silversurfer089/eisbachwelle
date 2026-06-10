@@ -101,6 +101,20 @@ export interface HistoryData {
 }
 
 /**
+ * Eine Meldung im News-Feed (Inhalt von public/data/news.json, Phase 1):
+ * nur Schlagzeile + Quelle + Link — bewusst keine Volltexte/Beschreibungen.
+ */
+export interface NewsItem {
+  /** Veröffentlichungsdatum, ISO 8601 UTC. */
+  t: string;
+  title: string;
+  /** Anzeigename der Quelle, z. B. "IGSM" oder "Rathaus Umschau". */
+  source: string;
+  /** Link zur Originalquelle (nur https). */
+  url: string;
+}
+
+/**
  * Abstimmstatus der Community (via Cloudflare Worker + KV).
  * Null wenn kein Worker konfiguriert oder Anfrage fehlgeschlagen.
  */

@@ -1,4 +1,9 @@
-import { loadCurrent, loadHistory, loadCommunityStatus } from "./data/source";
+import {
+  loadCurrent,
+  loadHistory,
+  loadCommunityStatus,
+  loadNews,
+} from "./data/source";
 import type { HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
 import {
@@ -10,6 +15,7 @@ import {
 import { renderContextPanel } from "./ui/context-panel";
 import { createHistorySection, type HistorySection } from "./ui/history";
 import { createCommunitySection, type CommunitySection } from "./ui/community";
+import { createNewsSection, type NewsSection } from "./ui/news";
 import { el } from "./ui/dom";
 import { t, onLangChange } from "./i18n";
 
@@ -27,6 +33,7 @@ let contextSlot: HTMLElement | null = null;
 let communitySection: CommunitySection | null = null;
 let forecastSlot: HTMLElement | null = null;
 let historySection: HistorySection | null = null;
+let newsSection: NewsSection | null = null;
 let rootEl: HTMLElement | null = null;
 
 /** Setzt die Shell zurück, sodass sie (z. B. nach Sprachwechsel) neu aufgebaut wird. */
@@ -36,6 +43,7 @@ function resetShell(): void {
   communitySection = null;
   forecastSlot = null;
   historySection = null;
+  newsSection = null;
 }
 
 function renderMessage(
@@ -81,6 +89,7 @@ function ensureShell(root: HTMLElement): void {
   communitySection = createCommunitySection();
   forecastSlot = el("div", { class: "forecast-slot" });
   historySection = createHistorySection();
+  newsSection = createNewsSection();
   root.replaceChildren(
     el("div", { class: "app-shell" }, [
       dashSlot,
@@ -88,6 +97,7 @@ function ensureShell(root: HTMLElement): void {
       communitySection.element,
       forecastSlot,
       historySection.element,
+      newsSection.element,
       renderAbout(),
       renderFooter(),
     ]),
@@ -110,6 +120,12 @@ async function refreshCommunity(): Promise<void> {
   communitySection.update(cs);
 }
 
+/** Aktualisiert den News-Feed separat (optional; ohne Datei bleibt die Sektion versteckt). */
+async function refreshNews(): Promise<void> {
+  if (!newsSection) return;
+  newsSection.update(await loadNews());
+}
+
 async function refresh(root: HTMLElement): Promise<void> {
   try {
     const [current, history] = await Promise.all([
@@ -121,6 +137,7 @@ async function refresh(root: HTMLElement): Promise<void> {
     ensureShell(root);
     paint(history);
     void refreshCommunity();
+    void refreshNews();
   } catch (err) {
     console.warn("[eisbach] Aktualisierung fehlgeschlagen:", err);
     if (lastVM && lastHistory) {

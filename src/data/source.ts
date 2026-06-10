@@ -3,6 +3,7 @@ import type {
   CommunityStatus,
   CurrentData,
   HistoryData,
+  NewsItem,
   VoteStatus,
 } from "./model";
 import { VOTE_STATUSES } from "./model";
@@ -76,6 +77,31 @@ export async function loadCurrent(signal?: AbortSignal): Promise<CurrentData> {
 /** Lädt und validiert die Historie. Wirft bei Netz-/Format-Fehlern. */
 export async function loadHistory(signal?: AbortSignal): Promise<HistoryData> {
   return validateHistory(await fetchJson("history.json", signal));
+}
+
+/** Lädt den News-Feed. Gibt null zurück, wenn die Datei fehlt oder unlesbar ist
+ *  (News sind optional — die Sektion wird dann nicht angezeigt). */
+export async function loadNews(
+  signal?: AbortSignal,
+): Promise<NewsItem[] | null> {
+  try {
+    const doc = (await fetchJson("news.json", signal)) as Record<
+      string,
+      unknown
+    >;
+    if (!Array.isArray(doc.items)) return null;
+    return doc.items.filter(
+      (i): i is NewsItem =>
+        typeof i === "object" &&
+        i !== null &&
+        typeof (i as NewsItem).t === "string" &&
+        typeof (i as NewsItem).title === "string" &&
+        typeof (i as NewsItem).source === "string" &&
+        typeof (i as NewsItem).url === "string",
+    );
+  } catch {
+    return null;
+  }
 }
 
 /** Holt den aktuellen Community-Status vom Worker. Gibt null zurück wenn kein

@@ -155,6 +155,11 @@ export const en: Strings = {
     },
   },
 
+  news: {
+    title: "News",
+    note: "Collected automatically from official and community sources – links go to the original source.",
+  },
+
   community: {
     title: "Community status",
     noVotes: "No reports yet",
