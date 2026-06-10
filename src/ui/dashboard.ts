@@ -234,15 +234,26 @@ function statusLine(vm: DashboardVM, now: Date): HTMLElement {
   return el("div", { class: "status" }, children);
 }
 
+// Heutiges Datum in Europe/Berlin als "YYYY-MM-DD" (en-CA liefert dieses Format).
+const berlinDate = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "Europe/Berlin",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 function dayLabel(dateStr: string, now: Date): string {
-  const d = new Date(`${dateStr}T12:00:00`);
-  if (Number.isNaN(d.getTime())) return dateStr;
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diff = Math.round((target.getTime() - today.getTime()) / 86_400_000);
+  // Vorhersage-Daten sind Berlin-Tage → auch "heute" in Berlin bestimmen,
+  // nicht in der Gerätezeitzone (sonst kippt das Label z. B. abends in den USA).
+  const target = Date.parse(dateStr);
+  if (!Number.isFinite(target)) return dateStr;
+  const today = Date.parse(berlinDate.format(now));
+  const diff = Math.round((target - today) / 86_400_000);
   if (diff === 0) return t.forecast.today;
   if (diff === 1) return t.forecast.tomorrow;
-  return dtf({ weekday: "short" }).format(d);
+  return dtf({ weekday: "short", timeZone: "Europe/Berlin" }).format(
+    new Date(`${dateStr}T12:00:00Z`),
+  );
 }
 
 function forecastDay(d: ForecastDay, now: Date): HTMLElement {

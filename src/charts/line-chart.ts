@@ -56,6 +56,8 @@ export interface LineChart {
     mode: RangeMode,
     unit: string,
     midnights?: number[],
+    /** Sichtbarer X-Bereich (ms); `max` ist der "Jetzt"-Zeitpunkt. */
+    range?: { min: number; max: number },
   ): void;
   destroy(): void;
 }
@@ -118,6 +120,16 @@ export function createLineChart(
         x: {
           type: "linear",
           grid: { display: false },
+          // Letzten Tick exakt ans rechte Achsenende ("Jetzt") legen; zu nahe
+          // Auto-Ticks vorher entfernen, damit sich die Labels nicht drängeln.
+          afterBuildTicks: (axis) => {
+            const span = axis.max - axis.min;
+            if (!Number.isFinite(span) || span <= 0) return;
+            axis.ticks = axis.ticks.filter(
+              (tk) => axis.max - tk.value > span * 0.06,
+            );
+            axis.ticks.push({ value: axis.max });
+          },
           ticks: {
             color: cssVar("--text-faint") || "#6f818b",
             maxRotation: 0,
@@ -161,7 +173,7 @@ export function createLineChart(
   const chart = new Chart(canvas, config);
 
   return {
-    update(points, color, nextMode, nextUnit, newMidnights) {
+    update(points, color, nextMode, nextUnit, newMidnights, range) {
       mode = nextMode;
       unit = nextUnit;
       midnights = newMidnights ?? [];
@@ -172,6 +184,12 @@ export function createLineChart(
       // Y-Achsen-Einheit aktualisieren
       const yTitle = chart.options.scales?.["y"]?.title;
       if (yTitle) yTitle.text = unit;
+      // X-Achse bis "jetzt" spannen (statt nur bis zum letzten Datenpunkt).
+      const xScale = chart.options.scales?.["x"];
+      if (xScale && range) {
+        xScale.min = range.min;
+        xScale.max = range.max;
+      }
       chart.update();
     },
     destroy() {

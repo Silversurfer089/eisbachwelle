@@ -104,6 +104,11 @@ export async function loadNews(
   }
 }
 
+/** True, wenn ein Community-Worker konfiguriert ist (VITE_LIVE_URL gesetzt). */
+export function communityConfigured(): boolean {
+  return Boolean(import.meta.env.VITE_LIVE_URL);
+}
+
 /** Holt den aktuellen Community-Status vom Worker. Gibt null zurück wenn kein
  *  Worker konfiguriert oder die Anfrage fehlschlägt (Community ist optional). */
 export async function loadCommunityStatus(

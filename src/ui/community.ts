@@ -110,9 +110,10 @@ export function createCommunitySection(): CommunitySection {
             if (result === "ok") {
               markVoted();
               showFeedback(t.community.thanks, true);
-              // Status aktualisieren.
+              // Status aktualisieren — aber nur bei Erfolg: ein fehlgeschlagener
+              // Refresh direkt nach dem Voten darf die Sektion nicht ausblenden.
               const fresh = await loadCommunityStatus();
-              update(fresh);
+              if (fresh) update(fresh);
             } else if (result === "cooldown") {
               showFeedback(t.community.cooldown, false);
             } else {

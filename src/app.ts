@@ -1,10 +1,12 @@
 import {
+  communityConfigured,
   loadCurrent,
   loadHistory,
   loadCommunityStatus,
   loadNews,
 } from "./data/source";
-import type { HistoryData } from "./data/model";
+import { withCurrentReadings } from "./data/domain/series";
+import type { CommunityStatus, HistoryData } from "./data/model";
 import { present, type DashboardVM } from "./ui/present";
 import {
   renderDashboard,
@@ -24,6 +26,7 @@ const REFRESH_MS = 5 * 60_000;
 
 let lastVM: DashboardVM | null = null;
 let lastHistory: HistoryData | null = null;
+let lastCommunity: CommunityStatus | null = null;
 let timer: number | undefined;
 
 // Persistente Shell-Teile (einmal gebaut, dann nur aktualisiert).
@@ -113,11 +116,24 @@ function paint(history: HistoryData): void {
   historySection!.update(history);
 }
 
-/** Aktualisiert den Community-Status separat (optional, kein Fehler wenn nicht verfügbar). */
+/**
+ * Aktualisiert den Community-Status separat (optional, kein Fehler wenn nicht
+ * verfügbar). Kurze Netz-Aussetzer direkt nach dem Laden werden mit bis zu zwei
+ * Wiederholungen überbrückt; schlagen alle fehl, bleibt der letzte bekannte
+ * Stand dieser Sitzung stehen, statt die Sektion grundlos auszublenden.
+ */
 async function refreshCommunity(): Promise<void> {
-  if (!communitySection) return;
-  const cs = await loadCommunityStatus();
-  communitySection.update(cs);
+  if (!communitySection || !communityConfigured()) return;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await new Promise((r) => setTimeout(r, 1500 * attempt));
+    const cs = await loadCommunityStatus();
+    if (cs) {
+      lastCommunity = cs;
+      communitySection?.update(cs);
+      return;
+    }
+  }
+  communitySection?.update(lastCommunity);
 }
 
 /** Aktualisiert den News-Feed separat (optional; ohne Datei bleibt die Sektion versteckt). */
@@ -128,10 +144,13 @@ async function refreshNews(): Promise<void> {
 
 async function refresh(root: HTMLElement): Promise<void> {
   try {
-    const [current, history] = await Promise.all([
+    const [current, rawHistory] = await Promise.all([
       loadCurrent(),
       loadHistory(),
     ]);
+    // Aktuellen Messwert (inkl. Near-Live) an die Cron-Historie anhängen,
+    // damit Trend, Einordnung und Verlaufs-Chart bis "jetzt" reichen.
+    const history = withCurrentReadings(rawHistory, current);
     lastVM = present(current, history);
     lastHistory = history;
     ensureShell(root);

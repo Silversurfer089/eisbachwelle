@@ -48,18 +48,26 @@ function downsample(
   bucketMs: number,
 ): { x: number; y: number }[] {
   if (bucketMs === 0 || pts.length === 0) return pts;
-  const buckets = new Map<number, number[]>();
+  const buckets = new Map<number, { ys: number[]; min: number; max: number }>();
   for (const p of pts) {
     const key = Math.floor(p.x / bucketMs) * bucketMs;
-    const arr = buckets.get(key) ?? [];
-    arr.push(p.y);
-    buckets.set(key, arr);
+    const b = buckets.get(key);
+    if (b) {
+      b.ys.push(p.y);
+      if (p.x < b.min) b.min = p.x;
+      if (p.x > b.max) b.max = p.x;
+    } else {
+      buckets.set(key, { ys: [p.y], min: p.x, max: p.x });
+    }
   }
   return [...buckets.entries()]
     .sort(([a], [b]) => a - b)
-    .map(([x, ys]) => ({
-      x: x + bucketMs / 2,
-      y: ys.reduce((a, b) => a + b, 0) / ys.length,
+    .map(([x, b]) => ({
+      // Bucket-Mitte, aber nie außerhalb der echten Messzeitpunkte des Buckets:
+      // Sonst läge der letzte Punkt eines angebrochenen Buckets vor (oder gar
+      // hinter) dem jüngsten Messwert und die Kurve endete nicht bei "jetzt".
+      x: Math.min(Math.max(x + bucketMs / 2, b.min), b.max),
+      y: b.ys.reduce((a, c) => a + c, 0) / b.ys.length,
     }));
 }
 
@@ -236,7 +244,8 @@ export function createHistorySection(): HistorySection {
   function redraw(): void {
     if (!data) return;
 
-    const cutoff = Date.now() - RANGE_MS[selRange];
+    const nowMs = Date.now();
+    const cutoff = nowMs - RANGE_MS[selRange];
     const points = data.series[selMetric]
       .map((p) => ({ x: Date.parse(p.t), y: p.v }))
       .filter((p) => Number.isFinite(p.x) && p.x >= cutoff);
@@ -269,9 +278,14 @@ export function createHistorySection(): HistorySection {
     if (!hasData) return;
     const color = cssVar(METRIC_COLOR_VAR[selMetric], "#2dd4bf");
     const chartPts = smooth(downsample(points, BUCKET_MS[selRange]), selRange);
-    const mids = midnightsBerlin(cutoff, Date.now());
+    const mids = midnightsBerlin(cutoff, nowMs);
+    // X-Achse explizit bis "jetzt" spannen — das "Jetzt"-Label sitzt damit am
+    // echten Jetzt, nicht am letzten Datenpunkt.
     void withChart((c) =>
-      c.update(chartPts, color, selRange, METRIC_UNIT[selMetric], mids),
+      c.update(chartPts, color, selRange, METRIC_UNIT[selMetric], mids, {
+        min: cutoff,
+        max: nowMs,
+      }),
     );
   }
 
