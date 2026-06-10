@@ -118,5 +118,61 @@ export function renderTempCurve(
   const fig = document.createElement("figure");
   fig.className = "tempcurve-wrap";
   fig.innerHTML = svg;
+
+  // Hover-Tooltip: Crosshair + Wertanzeige (mousemove + touchmove)
+  const crosshair = document.createElement("div");
+  crosshair.className = "tc__crosshair";
+  crosshair.hidden = true;
+  const tooltip = document.createElement("div");
+  tooltip.className = "tc__tooltip";
+  tooltip.hidden = true;
+  fig.appendChild(crosshair);
+  fig.appendChild(tooltip);
+
+  const svgEl = fig.querySelector("svg")!;
+
+  function showAt(clientX: number): void {
+    const rect = svgEl.getBoundingClientRect();
+    const relX = ((clientX - rect.left) / rect.width) * W;
+    const idx = Math.max(
+      0,
+      Math.min(
+        data.length - 1,
+        Math.round(((relX - PAD.l) / innerW) * (data.length - 1)),
+      ),
+    );
+    const pct = (xAt(idx) / W) * 100;
+    crosshair.style.left = `${pct}%`;
+    crosshair.hidden = false;
+
+    const d = data[idx]!;
+    const timeStr =
+      idx === 0
+        ? t.forecast.now
+        : dtf({ weekday: "short", hour: "2-digit", timeZone: "Europe/Berlin" })
+            .format(d.ms)
+            .replace(/\s?Uhr/, "");
+    tooltip.textContent = `${Math.round(d.v)}° · ${timeStr}`;
+    // Anker links/mitte/rechts je nach Position – verhindert Abschneiden am Rand
+    tooltip.style.transform =
+      idx < data.length * 0.15
+        ? "translateX(4px)"
+        : idx > data.length * 0.85
+          ? "translateX(calc(-100% - 4px))"
+          : "translateX(-50%)";
+    tooltip.style.left = `${pct}%`;
+    tooltip.hidden = false;
+  }
+
+  svgEl.addEventListener("mousemove", (e) => { showAt(e.clientX); });
+  svgEl.addEventListener(
+    "touchmove",
+    (e) => { e.preventDefault(); showAt(e.touches[0]!.clientX); },
+    { passive: false },
+  );
+  const hide = () => { crosshair.hidden = true; tooltip.hidden = true; };
+  svgEl.addEventListener("mouseleave", hide);
+  svgEl.addEventListener("touchend", hide);
+
   return fig;
 }

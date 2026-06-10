@@ -324,6 +324,31 @@ body {
 /* Glatte Temperatur-Kurve (leichtes Inline-SVG). */
 .tempcurve-wrap {
   margin: 2px 0 14px;
+  position: relative;
+}
+
+.tc__crosshair {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: rgba(127, 145, 155, 0.45);
+  pointer-events: none;
+  transform: translateX(-50%);
+}
+
+.tc__tooltip {
+  position: absolute;
+  top: 0;
+  background: var(--card);
+  border: 1px solid var(--card-edge);
+  border-radius: 8px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  color: var(--text);
+  pointer-events: none;
+  white-space: nowrap;
+  z-index: 1;
 }
 
 .tempcurve {

@@ -107,6 +107,8 @@ function midnightsBerlin(from: number, to: number): number[] {
       Number(p["month"]) - 1,
       Number(p["day"]),
     ];
+    // Fallback: 24h weiter falls kein Midnight-Kandidat gefunden wird
+    let nextCursor = cursor + 24 * 60 * 60_000;
     for (const off of [2, 1]) {
       const candidate = new Date(Date.UTC(y, mo, d, -off, 0));
       const cp = Object.fromEntries(
@@ -120,6 +122,10 @@ function midnightsBerlin(from: number, to: number): number[] {
         Number(cp["day"]) === d
       ) {
         const ms = candidate.getTime();
+        // Nächsten Cursor von dieser Mitternacht aus setzen, nicht von cursor.
+        // Ohne das würde ein Nachmittags-Cursor (+24h) die NÄCHSTE Mitternacht
+        // überspringen, weil er bereits hinter `to` landet.
+        nextCursor = ms + 24 * 60 * 60_000;
         if (ms > from && ms < to && !seen.has(ms)) {
           seen.add(ms);
           result.push(ms);
@@ -127,7 +133,7 @@ function midnightsBerlin(from: number, to: number): number[] {
         break;
       }
     }
-    cursor += 24 * 60 * 60_000; // +1 Tag
+    cursor = nextCursor;
   }
   return result.sort((a, b) => a - b);
 }
