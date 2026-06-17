@@ -24,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (Code/Skript)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Vorhandenen data-Branch auschecken (falls vorhanden)
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           ref: data
           path: data-branch
