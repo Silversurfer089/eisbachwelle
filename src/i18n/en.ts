@@ -67,7 +67,7 @@ export const en: Strings = {
     method:
       "The percentile ranking is derived purely from the data collected so far and is only a rough orientation – not a quality, suitability or safety judgement.",
     sourceCode: "Source code (GitHub)",
-    repoUrl: "https://github.com/Silversurfer089/eisbachwellle",
+    repoUrl: "https://github.com/Silversurfer089/eisbachwelle",
   },
 
   status: {

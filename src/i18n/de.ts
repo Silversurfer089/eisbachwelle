@@ -67,7 +67,7 @@ export const de = {
     method:
       "Die Perzentil-Einordnung leitet sich rein aus den bisher gesammelten Messwerten ab und ist nur eine Orientierung – kein Qualitäts-, Eignungs- oder Sicherheitsurteil.",
     sourceCode: "Quellcode (GitHub)",
-    repoUrl: "https://github.com/Silversurfer089/eisbachwellle",
+    repoUrl: "https://github.com/Silversurfer089/eisbachwelle",
   },
 
   status: {
