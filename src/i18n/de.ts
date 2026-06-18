@@ -138,7 +138,10 @@ export const de = {
     now: "Jetzt",
     sourceNote: "Lufttemperatur & Niederschlag · Open-Meteo",
     waterNote:
-      "Für Abfluss und Pegel gibt es keine seriöse Tagesvorhersage – der Kanal ist reguliert und kurzfristig sehr stabil. Die Wassertemperatur-Tendenz auf der Karte ist nur eine grobe Schätzung aus der Luft.",
+      "Für Abfluss und Pegel gibt es keine seriöse Tagesvorhersage – der Kanal ist reguliert und kurzfristig sehr stabil. Die Wassertemperatur-Tendenz ist nur eine grobe Schätzung aus der Luft.",
+    outlookTitle: "Wasser-Ausblick",
+    outlookPending:
+      "Eine konkrete Tagesvorhersage (°C) folgt, sobald das Modell mit genügend Daten validiert ist.",
     bestTime: (start: number, end: number) =>
       `Wassertemperatur zuletzt meist am höchsten ca. ${start}–${end} Uhr (beobachtetes Muster, keine Vorhersage).`,
     today: "Heute",

@@ -321,6 +321,48 @@ body {
   font-weight: 700;
 }
 
+/* "Wasser-Ausblick": konsolidierte, ehrliche Vorhersage-Box (Tendenz + Tagesgang
+   + transparenter Hinweis, dass die konkrete Grad-Zahl noch validiert wird). */
+.outlook {
+  margin-top: 16px;
+  background: linear-gradient(180deg, var(--card), var(--bg-soft));
+  border: 1px solid var(--card-edge);
+  border-radius: var(--radius);
+  padding: 14px 16px 16px;
+  box-shadow: var(--shadow);
+}
+
+.outlook__title {
+  margin: 0 0 8px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.outlook__line {
+  margin: 0 0 5px;
+  font-size: 0.9rem;
+}
+
+.outlook__label {
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.outlook__pending {
+  margin: 10px 0 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--card-edge);
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+.outlook__note {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  font-style: italic;
+}
+
 .forecast__grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);

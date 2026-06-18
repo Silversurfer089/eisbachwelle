@@ -1,7 +1,6 @@
 import { t, getLang, setLang } from "../i18n";
 import { wetsuitClass } from "../data/domain/neoprene";
 import { weatherKey } from "../data/domain/weather";
-import type { WaterTendency } from "../data/domain/watertrend";
 import type { ForecastDay, ForecastHour } from "../data/model";
 import {
   dtf,
@@ -104,18 +103,7 @@ function shareButton(vm: DashboardVM): HTMLElement {
   return btn;
 }
 
-function waterTendencyLine(tend: WaterTendency): HTMLElement | null {
-  if (tend === "unknown") return null;
-  return el("p", { class: "card__est" }, [
-    `${t.waterEstimate.prefix}: ${t.waterEstimate[tend]} (${t.waterEstimate.estimate})`,
-  ]);
-}
-
-function metricCard(
-  m: MetricVM,
-  now: Date,
-  waterTend: WaterTendency = "unknown",
-): HTMLElement {
+function metricCard(m: MetricVM, now: Date): HTMLElement {
   const meta = t.metric[m.key];
   const isPrimary = m.key === "flow";
   const classes = ["card"];
@@ -179,11 +167,6 @@ function metricCard(
 
   const neo = neopreneHint(m);
   if (neo) children.push(neo);
-
-  if (m.key === "waterTemp" && m.reading) {
-    const wt = waterTendencyLine(waterTend);
-    if (wt) children.push(wt);
-  }
 
   const ariaLabel = m.reading
     ? `${meta.label}: ${formatValue(m.reading.value, m.key)} ${m.reading.unit}, ${t.trend[m.trend]}, ${t.status.measuredAt} ${formatRelative(m.reading.t, now)}`
@@ -366,23 +349,50 @@ export function renderForecast(
 
   children.push(
     el("p", { class: "forecast__source" }, [t.forecast.sourceNote]),
-    el("p", { class: "forecast__waternote" }, [t.forecast.waterNote]),
+    renderWaterOutlook(vm),
   );
-
-  // Randinfo: typisches Tagesfenster der höchsten Wassertemperatur (Beobachtung).
-  if (vm.warmWindow) {
-    children.push(
-      el("p", { class: "forecast__waternote" }, [
-        t.forecast.bestTime(vm.warmWindow.startHour, vm.warmWindow.endHour),
-      ]),
-    );
-  }
 
   return el(
     "section",
     { class: "forecast", "aria-label": t.forecast.title },
     children,
   );
+}
+
+/**
+ * Konsolidierte, ehrliche "Wasser-Ausblick"-Box: Wassertemperatur-Tendenz +
+ * beobachtetes Tagesgang-Fenster + transparenter Hinweis, dass die konkrete
+ * Grad-Vorhersage noch validiert wird. Bewusst KEINE °C-Zahl (Honesty-Leitplanke).
+ */
+function renderWaterOutlook(vm: DashboardVM): HTMLElement {
+  const f = t.forecast;
+  const children: HTMLElement[] = [
+    el("h3", { class: "outlook__title" }, [f.outlookTitle]),
+  ];
+
+  if (vm.waterTendency !== "unknown") {
+    children.push(
+      el("p", { class: "outlook__line" }, [
+        el("span", { class: "outlook__label" }, [
+          `${t.waterEstimate.prefix}: `,
+        ]),
+        `${t.waterEstimate[vm.waterTendency]} (${t.waterEstimate.estimate})`,
+      ]),
+    );
+  }
+
+  if (vm.warmWindow) {
+    children.push(
+      el("p", { class: "outlook__line" }, [
+        f.bestTime(vm.warmWindow.startHour, vm.warmWindow.endHour),
+      ]),
+    );
+  }
+
+  children.push(el("p", { class: "outlook__pending" }, [f.outlookPending]));
+  children.push(el("p", { class: "outlook__note" }, [f.waterNote]));
+
+  return el("div", { class: "outlook" }, children);
 }
 
 /** Live-Teil (Kopf + Karten). Wird bei jeder Aktualisierung neu gerendert. */
@@ -412,7 +422,7 @@ export function renderDashboard(
   const grid = el(
     "section",
     { class: "grid", "aria-label": t.appName },
-    vm.metrics.map((m) => metricCard(m, now, vm.waterTendency)),
+    vm.metrics.map((m) => metricCard(m, now)),
   );
 
   return el("div", { class: "dashboard" }, [header, grid]);
