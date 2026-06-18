@@ -1216,6 +1216,19 @@ body {
   }
 }
 
+/* Breite Schirme (Laptop/Desktop): Container weiter aufziehen, damit der Platz
+   genutzt wird. Fließtexte werden separat begrenzt, damit Zeilen lesbar bleiben. */
+@media (min-width: 900px) {
+  .app-shell {
+    max-width: 960px;
+  }
+  /* Lange Fließtexte auf angenehme Zeilenlänge halten, auch wenn der Container
+     breit ist. Kurze Texte in den Karten sind ohnehin schmaler → unberührt. */
+  .app-shell p {
+    max-width: 68ch;
+  }
+}
+
 /* --- Light-Mode-Fallback (Barrierefreiheit / Nutzerpräferenz) --- */
 
 @media (prefers-color-scheme: light) {
