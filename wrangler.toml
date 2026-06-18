@@ -1,0 +1,26 @@
+# Deployment-Config für den Near-Live-/Community-Worker (Cloudflare).
+# Deploy:  npx wrangler deploy
+#
+# WICHTIG: Die KV-Bindung "KV" hält die Community-Votes. Die id unten muss auf
+# den BESTEHENDEN KV-Namespace zeigen, sonst ist das Voting nach dem Deploy leer.
+# Aktuelle Namespaces anzeigen:  npx wrangler kv namespace list
+
+name = "eisbachlive"
+main = "workers/eisbach-live.js"
+compatibility_date = "2025-11-01"
+
+# Explizit, damit ein Deploy die Remote-Einstellungen nicht still umschaltet.
+# observability/logs bleiben an (für die geplante Vote-↔-Abfluss-Auswertung).
+preview_urls = false
+
+[observability]
+enabled = true
+
+[observability.logs]
+enabled = true
+
+# Community-Voting (KV). id zeigt auf den bestehenden Namespace "eisbach-votes",
+# damit die bisherigen Meldungen nach dem Deploy erhalten bleiben.
+[[kv_namespaces]]
+binding = "KV"
+id = "627fc2cd14a442a4aa8d21a167d1cbdb"
